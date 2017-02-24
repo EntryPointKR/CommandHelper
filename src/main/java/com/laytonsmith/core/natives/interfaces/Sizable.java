@@ -8,9 +8,10 @@ import com.laytonsmith.annotations.typeof;
 @typeof("Sizable")
 public interface Sizable {
 
-	/**
-	 * Returns the size of this object.
-	 * @return
-	 */
-	long size();
+    /**
+     * Returns the size of this object.
+     *
+     * @return
+     */
+    long size();
 }

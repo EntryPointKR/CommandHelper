@@ -4,14 +4,14 @@ import com.laytonsmith.abstraction.MCLocation;
 
 /**
  *
- * 
+ *
  */
 public interface MCPlayerRespawnEvent extends MCPlayerEvent {
 
-    public void setRespawnLocation(MCLocation location);
-
     public MCLocation getRespawnLocation();
 
-	public Boolean isBedSpawn();
+    public void setRespawnLocation(MCLocation location);
+
+    public Boolean isBedSpawn();
 
 }

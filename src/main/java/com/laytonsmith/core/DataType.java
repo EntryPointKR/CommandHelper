@@ -1,5 +1,3 @@
-
-
 package com.laytonsmith.core;
 
 import java.util.EnumMap;
@@ -16,10 +14,72 @@ import java.util.Map;
  * deferred to runtime, however, in cases where a type is requested, and the
  * type returned is not that, nor can it be cast to that, a compile error can
  * be given.
- * 
  */
 public class DataType {
-    private static enum DataTypes{
+    private static DataType MIXED = new DataType(DataTypes.MIXED, null);
+    private static DataType PRIMITIVE = new DataType(DataTypes.PRIMITIVE, null);
+    Map<DataTypes, Boolean> cachedCastableTo = new EnumMap<DataTypes, Boolean>(DataTypes.class);
+    private DataTypes type;
+    private DataTypes subType;
+
+    private DataType(DataTypes myType, DataTypes subType) {
+        if (myType != DataTypes.ARRAY && subType != null) {
+            throw new Error("subType cannot be set except for arrays");
+        }
+        this.type = myType;
+        this.subType = subType;
+    }
+
+    public static DataType MIXED() {
+        return MIXED;
+    }
+
+    public static DataType PRIMITIVE() {
+        return PRIMITIVE;
+    }
+
+    public boolean castableTo(DataType type) {
+        return castableTo(type.type, null);
+    }
+
+    private boolean castableTo(DataTypes type, Boolean upward) {
+        if (cachedCastableTo.containsKey(type)) {
+            return cachedCastableTo.get(type);
+        } else {
+            boolean answer = false;
+            //We need to see if type is either a parent, or a child (or a child of our children, etc)
+            if (upward == null || upward == true) {
+                for (DataTypes parent : this.type.parents) {
+                    if (parent == type) {
+                        answer = true;
+                        break;
+                    } else {
+                        if (castableTo(parent, true)) {
+                            answer = true;
+                        }
+                    }
+                }
+            }
+            if (upward == null || upward == false) {
+                for (DataTypes child : this.type.children) {
+                    if (child == type) {
+                        answer = true;
+                        break;
+                    } else {
+                        castableTo(child, false);
+                    }
+                }
+            }
+            cachedCastableTo.put(type, answer);
+            return answer;
+        }
+    }
+
+    public boolean isSameType(DataType type) {
+        return this.type == type.type;
+    }
+
+    private static enum DataTypes {
         DOUBLE,
         INT,
         STRING,
@@ -29,10 +89,7 @@ public class DataType {
         PRIMITIVE,
         ARRAY,
         MIXED;
-        EnumSet<DataTypes> parents;
-        EnumSet<DataTypes> children;
-        
-        static{
+        static {
             DOUBLE.setup(EnumSet.of(NUMBER), null);
             INT.setup(EnumSet.of(INT), null);
             STRING.setup(EnumSet.of(PRIMITIVE), null);
@@ -43,78 +100,22 @@ public class DataType {
             ARRAY.setup(EnumSet.of(MIXED), EnumSet.of(MAP, OBJECT));
             MIXED.setup(null, EnumSet.of(PRIMITIVE, ARRAY));
         }
-        private void setup(EnumSet<DataTypes> parents, EnumSet<DataTypes> children){
-            if(parents == null){
+
+        EnumSet<DataTypes> parents;
+        EnumSet<DataTypes> children;
+
+        private void setup(EnumSet<DataTypes> parents, EnumSet<DataTypes> children) {
+            if (parents == null) {
                 this.parents = EnumSet.noneOf(DataTypes.class);
             } else {
                 this.parents = parents;
             }
-            if(children == null){
+            if (children == null) {
                 this.children = EnumSet.noneOf(DataTypes.class);
             } else {
                 this.children = children;
             }
         }
     }
-    private DataTypes type;
-    private DataTypes subType;
-    private DataType(DataTypes myType, DataTypes subType){
-        if(myType != DataTypes.ARRAY && subType != null){
-            throw new Error("subType cannot be set except for arrays");
-        }
-        this.type = myType;
-        this.subType = subType;
-    }
-    
-    Map<DataTypes, Boolean> cachedCastableTo = new EnumMap<DataTypes, Boolean>(DataTypes.class);
-    public boolean castableTo(DataType type){
-        return castableTo(type.type, null);
-    }
-    private boolean castableTo(DataTypes type, Boolean upward){
-        if(cachedCastableTo.containsKey(type)){
-            return cachedCastableTo.get(type);
-        } else {
-            boolean answer = false;
-            //We need to see if type is either a parent, or a child (or a child of our children, etc)
-            if(upward == null || upward == true){
-                for(DataTypes parent : this.type.parents){
-                    if(parent == type){
-                        answer = true;
-                        break;
-                    } else {
-                        if(castableTo(parent, true)){
-                            answer = true;
-                        }
-                    }
-                }
-            }
-            if(upward == null || upward == false){
-                for(DataTypes child : this.type.children){
-                    if(child == type){
-                        answer = true;
-                        break;
-                    } else {
-                        castableTo(child, false);
-                    }
-                }
-            }
-            cachedCastableTo.put(type, answer);
-            return answer;
-        }        
-    }        
-    
-    public boolean isSameType(DataType type){
-        return this.type == type.type;
-    }
-    
-    private static DataType MIXED = new DataType(DataTypes.MIXED, null);
-    public static DataType MIXED(){
-        return MIXED;
-    }        
-    
-    private static DataType PRIMITIVE = new DataType(DataTypes.PRIMITIVE, null);
-    public static DataType PRIMITIVE(){
-        return PRIMITIVE;
-    }
-    
+
 }

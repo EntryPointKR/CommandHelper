@@ -1,5 +1,3 @@
-
-
 package com.laytonsmith.core.functions;
 
 import com.laytonsmith.abstraction.MCPlayer;
@@ -14,19 +12,20 @@ import com.laytonsmith.core.exceptions.CancelCommandException;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.testing.C;
 import com.laytonsmith.testing.StaticTest;
+import org.junit.After;
+import org.junit.AfterClass;
+import org.junit.Before;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
 import static com.laytonsmith.testing.StaticTest.GetFakeServer;
 import static com.laytonsmith.testing.StaticTest.GetOnlinePlayer;
 import static com.laytonsmith.testing.StaticTest.SRun;
 import static com.laytonsmith.testing.StaticTest.TestClassDocs;
 import static com.laytonsmith.testing.StaticTest.assertCFalse;
 import static com.laytonsmith.testing.StaticTest.assertCTrue;
-import org.junit.After;
-import org.junit.AfterClass;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.Test;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
@@ -48,13 +47,13 @@ public class BasicLogicTest {
     CBoolean _false;
     com.laytonsmith.core.environments.Environment env;
 
-    public BasicLogicTest() throws Exception{
-		env = Static.GenerateStandaloneEnvironment();
+    public BasicLogicTest() throws Exception {
+        env = Static.GenerateStandaloneEnvironment();
     }
 
     @BeforeClass
     public static void setUpClass() throws Exception {
-		StaticTest.InstallFakeServerFrontend();
+        StaticTest.InstallFakeServerFrontend();
     }
 
     @AfterClass
@@ -364,18 +363,20 @@ public class BasicLogicTest {
                 + "correct)", null));
     }
 
-    @Test public void testSwitch2() throws Exception{
+    @Test
+    public void testSwitch2() throws Exception {
         SRun("switch(2, 1, msg('nope'), 2, msg('yep'))", fakePlayer);
         verify(fakePlayer).sendMessage("yep");
     }
 
-    @Test public void testSwitch3() throws Exception{
+    @Test
+    public void testSwitch3() throws Exception {
         SRun("assign(@args, 'test')" +
-                "switch(@args," +
-                    "'test'," +
+                        "switch(@args," +
+                        "'test'," +
                         "msg('test')," +
-                    "msg('default')" +
-                ")",
+                        "msg('default')" +
+                        ")",
                 fakePlayer);
         verify(fakePlayer).sendMessage("test");
     }
@@ -410,87 +411,91 @@ public class BasicLogicTest {
         verify(fakePlayer).sendMessage("Hello World!");
     }
 
-	@Test
-	public void testSwitchWithRange() throws Exception{
-		SRun("switch(dyn(1)){"
-				+ "case 0..5: msg('yes')"
-				+ "case 6..10: msg('no')"
-				+ "}"
-				+ "switch(dyn(1)){"
-				+ "case 1..5: msg('yes')"
-				+ "}"
-				+ "switch(dyn(1)){"
-				+ "case 5..0: msg('yes')"
-				+ "}"
-				+ "switch(dyn(1)){"
-				+ "case 1..2: case 3..4: msg('yes')"
-				+ "}", fakePlayer);
-		verify(fakePlayer, times(4)).sendMessage("yes");
-	}
+    @Test
+    public void testSwitchWithRange() throws Exception {
+        SRun("switch(dyn(1)){"
+                + "case 0..5: msg('yes')"
+                + "case 6..10: msg('no')"
+                + "}"
+                + "switch(dyn(1)){"
+                + "case 1..5: msg('yes')"
+                + "}"
+                + "switch(dyn(1)){"
+                + "case 5..0: msg('yes')"
+                + "}"
+                + "switch(dyn(1)){"
+                + "case 1..2: case 3..4: msg('yes')"
+                + "}", fakePlayer);
+        verify(fakePlayer, times(4)).sendMessage("yes");
+    }
 
-	@Test
-	public void testRefEquals1() throws Exception {
-		SRun("@a = array(1, 2, 3)\n" //Same reference
-				+ "@b = @a\n"
-				+ "msg(ref_equals(@a, @b))", fakePlayer);
-		verify(fakePlayer).sendMessage("true");
-	}
-	@Test
-	public void testRefEquals2() throws Exception {
-		SRun("@a = array(1, 2, 3)\n" //Cloned array
-				+ "@b = @a[]\n"
-				+ "msg(ref_equals(@a, @b))", fakePlayer);
-		verify(fakePlayer).sendMessage("false");
-	}
-	@Test
-	public void testRefEquals3() throws Exception {
-		SRun("@a = array(1, 2, 3)\n" //Duplicated array
-				+ "@b = array(1, 2, 3)\n"
-				+ "msg(ref_equals(@a, @b))", fakePlayer);
-		verify(fakePlayer).sendMessage("false");
-	}
-	@Test
-	public void testRefEquals4() throws Exception {
-		SRun("@a = 1\n" //Primitives; same
-				+ "@b = 1\n"
-				+ "msg(ref_equals(@a, @b))", fakePlayer);
-		verify(fakePlayer).sendMessage("true");
-	}
-	@Test
-	public void testRefEquals5() throws Exception {
-		SRun("@a = 1\n" //Primitives; different
-				+ "@b = 2\n"
-				+ "msg(ref_equals(@a, @b))", fakePlayer);
-		verify(fakePlayer).sendMessage("false");
-	}
+    @Test
+    public void testRefEquals1() throws Exception {
+        SRun("@a = array(1, 2, 3)\n" //Same reference
+                + "@b = @a\n"
+                + "msg(ref_equals(@a, @b))", fakePlayer);
+        verify(fakePlayer).sendMessage("true");
+    }
 
-	@Test
-	public void testSEqualsic1() throws Exception {
-		SRun("msg(sequals_ic(1, '1'))", fakePlayer);
-		verify(fakePlayer).sendMessage("false");
-	}
+    @Test
+    public void testRefEquals2() throws Exception {
+        SRun("@a = array(1, 2, 3)\n" //Cloned array
+                + "@b = @a[]\n"
+                + "msg(ref_equals(@a, @b))", fakePlayer);
+        verify(fakePlayer).sendMessage("false");
+    }
 
-	@Test
-	public void testSEqualsic2() throws Exception {
-		SRun("msg(sequals_ic('hello', 'HELLO'))", fakePlayer);
-		verify(fakePlayer).sendMessage("true");
-	}
+    @Test
+    public void testRefEquals3() throws Exception {
+        SRun("@a = array(1, 2, 3)\n" //Duplicated array
+                + "@b = array(1, 2, 3)\n"
+                + "msg(ref_equals(@a, @b))", fakePlayer);
+        verify(fakePlayer).sendMessage("false");
+    }
 
-	@Test
-	public void testSEqualsic3() throws Exception {
-		SRun("msg(sequals_ic('false', true))", fakePlayer);
-		verify(fakePlayer).sendMessage("false");
-	}
+    @Test
+    public void testRefEquals4() throws Exception {
+        SRun("@a = 1\n" //Primitives; same
+                + "@b = 1\n"
+                + "msg(ref_equals(@a, @b))", fakePlayer);
+        verify(fakePlayer).sendMessage("true");
+    }
 
-	@Test
-	public void testDor() throws Exception {
-	    SRun("msg(dor('', 'b'))", fakePlayer);
-	    verify(fakePlayer).sendMessage("b");
-	}
+    @Test
+    public void testRefEquals5() throws Exception {
+        SRun("@a = 1\n" //Primitives; different
+                + "@b = 2\n"
+                + "msg(ref_equals(@a, @b))", fakePlayer);
+        verify(fakePlayer).sendMessage("false");
+    }
 
-	@Test
-	public void testDand() throws Exception {
-	    SRun("msg(typeof(dand('a', 'b', false)))", fakePlayer);
-	    verify(fakePlayer).sendMessage("boolean");
-	}
+    @Test
+    public void testSEqualsic1() throws Exception {
+        SRun("msg(sequals_ic(1, '1'))", fakePlayer);
+        verify(fakePlayer).sendMessage("false");
+    }
+
+    @Test
+    public void testSEqualsic2() throws Exception {
+        SRun("msg(sequals_ic('hello', 'HELLO'))", fakePlayer);
+        verify(fakePlayer).sendMessage("true");
+    }
+
+    @Test
+    public void testSEqualsic3() throws Exception {
+        SRun("msg(sequals_ic('false', true))", fakePlayer);
+        verify(fakePlayer).sendMessage("false");
+    }
+
+    @Test
+    public void testDor() throws Exception {
+        SRun("msg(dor('', 'b'))", fakePlayer);
+        verify(fakePlayer).sendMessage("b");
+    }
+
+    @Test
+    public void testDand() throws Exception {
+        SRun("msg(typeof(dand('a', 'b', false)))", fakePlayer);
+        verify(fakePlayer).sendMessage("boolean");
+    }
 }

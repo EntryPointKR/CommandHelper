@@ -6,26 +6,26 @@ import com.laytonsmith.core.CHVersion;
 import com.laytonsmith.core.constructs.Target;
 
 /**
- * 
+ *
  */
 @typeof("InsufficientArgumentsException")
 public class CREInsufficientArgumentsException extends CREException {
-	public CREInsufficientArgumentsException(String msg, Target t) {
-		super(msg, t);
-	}
+    public CREInsufficientArgumentsException(String msg, Target t) {
+        super(msg, t);
+    }
 
-	public CREInsufficientArgumentsException(String msg, Target t, Throwable cause) {
-		super(msg, t, cause);
-	}
+    public CREInsufficientArgumentsException(String msg, Target t, Throwable cause) {
+        super(msg, t, cause);
+    }
 
-	@Override
-	public String docs() {
-		return "Some var arg functions may require at least a certain number of"
-			+ " arguments to be passed to the function";
-	}
+    @Override
+    public String docs() {
+        return "Some var arg functions may require at least a certain number of"
+                + " arguments to be passed to the function";
+    }
 
-	@Override
-	public Version since() {
-		return CHVersion.V3_3_1;
-	}
+    @Override
+    public Version since() {
+        return CHVersion.V3_3_1;
+    }
 }

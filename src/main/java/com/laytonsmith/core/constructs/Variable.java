@@ -2,7 +2,7 @@ package com.laytonsmith.core.constructs;
 
 /**
  *
- * 
+ *
  */
 public class Variable extends Construct {
 
@@ -35,20 +35,20 @@ public class Variable extends Construct {
         return name;
     }
 
-    public void setFinal(boolean final_var) {
-        this.final_var = final_var;
-    }
-
     public boolean isFinal() {
         return final_var;
     }
 
-    public void setOptional(boolean optional) {
-        this.optional = optional;
+    public void setFinal(boolean final_var) {
+        this.final_var = final_var;
     }
 
     public boolean isOptional() {
         return optional;
+    }
+
+    public void setOptional(boolean optional) {
+        this.optional = optional;
     }
 
     public String getDefault() {
@@ -56,9 +56,9 @@ public class Variable extends Construct {
     }
 
     public void setDefault(String def) {
-		if(def == null){
-			def = "";
-		}
+        if (def == null) {
+            def = "";
+        }
         this.def = def;
     }
 
@@ -70,10 +70,10 @@ public class Variable extends Construct {
     public void setVal(CString val) {
         this.var_value = val;
     }
-	
-	public void setVal(String val){
-		this.var_value = new CString(val, this.getTarget());
-	}
+
+    public void setVal(String val) {
+        this.var_value = new CString(val, this.getTarget());
+    }
 
     @Override
     public Variable clone() throws CloneNotSupportedException {

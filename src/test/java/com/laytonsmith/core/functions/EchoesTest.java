@@ -1,5 +1,3 @@
-
-
 package com.laytonsmith.core.functions;
 
 import com.laytonsmith.abstraction.MCPlayer;
@@ -13,17 +11,19 @@ import com.laytonsmith.core.exceptions.CancelCommandException;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.functions.Echoes.color;
 import com.laytonsmith.testing.C;
+import org.junit.After;
+import org.junit.AfterClass;
+import org.junit.Before;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import java.lang.reflect.InvocationTargetException;
+
 import static com.laytonsmith.testing.StaticTest.GetFakeServer;
 import static com.laytonsmith.testing.StaticTest.GetOnlinePlayer;
 import static com.laytonsmith.testing.StaticTest.SRun;
 import static com.laytonsmith.testing.StaticTest.TestClassDocs;
-import java.lang.reflect.InvocationTargetException;
-import org.junit.After;
-import org.junit.AfterClass;
 import static org.junit.Assert.assertEquals;
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.Test;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -33,6 +33,7 @@ import static org.mockito.Mockito.when;
  */
 public class EchoesTest {
 
+    private static String a = new color().exec(Target.UNKNOWN, null, new CString("a", Target.UNKNOWN)).val();
     MCServer fakeServer;
     MCPlayer fakePlayer;
     com.laytonsmith.core.environments.Environment env;
@@ -52,7 +53,7 @@ public class EchoesTest {
     public void setUp() throws Exception {
         fakeServer = GetFakeServer();
         fakePlayer = GetOnlinePlayer(fakeServer);
-		env = Static.GenerateStandaloneEnvironment();
+        env = Static.GenerateStandaloneEnvironment();
         env.getEnv(CommandHelperEnvironment.class).SetPlayer(fakePlayer);
     }
 
@@ -105,13 +106,13 @@ public class EchoesTest {
     }
 
     @Test
-    public void testIndentation() throws Exception{
+    public void testIndentation() throws Exception {
         SRun("msg('yay\n yay\n  yay\n   yay')", fakePlayer);
         verify(fakePlayer).sendMessage("yay\n yay\n  yay\n   yay");
     }
 
     @Test
-    public void testColor() throws Exception{
+    public void testColor() throws Exception {
         assertEquals(String.format("\u00A7%s", "f"), SRun("color(white)", fakePlayer));
         assertEquals(String.format("\u00A7%s", "6"), SRun("color(gold)", fakePlayer));
         assertEquals(String.format("\u00A7%s", "k"), SRun("color(random)", fakePlayer));
@@ -119,23 +120,33 @@ public class EchoesTest {
         assertEquals(String.format("\u00A7%s", "a"), SRun("color(a)", fakePlayer));
     }
 
-	private static String a = new color().exec(Target.UNKNOWN, null, new CString("a", Target.UNKNOWN)).val();
-	@Test public void testColorize1() throws Exception{
-		assertEquals(a + "Hi", SRun("colorize('&aHi')", fakePlayer));
-	}
-	@Test public void testColorize2() throws Exception{
-		assertEquals("&aHi", SRun("colorize('&&aHi')", fakePlayer));
-	}
-	@Test public void testColorize3() throws Exception{
-		assertEquals("&", SRun("colorize('&&')", fakePlayer));
-	}
-	@Test public void testColorize4() throws Exception{
-		assertEquals("&&" + a + "Hi", SRun("colorize('&&&&&aHi')", fakePlayer));
-	}
-	@Test public void testColorize5() throws Exception{
-		assertEquals("&&", SRun("colorize('&&&&', '&&')", fakePlayer));
-	}
-	@Test public void testColorize6() throws Exception{
-		assertEquals("&&" + a + "Hi", SRun("colorize('&&&&&&aHi', '&&')", fakePlayer));
-	}
+    @Test
+    public void testColorize1() throws Exception {
+        assertEquals(a + "Hi", SRun("colorize('&aHi')", fakePlayer));
+    }
+
+    @Test
+    public void testColorize2() throws Exception {
+        assertEquals("&aHi", SRun("colorize('&&aHi')", fakePlayer));
+    }
+
+    @Test
+    public void testColorize3() throws Exception {
+        assertEquals("&", SRun("colorize('&&')", fakePlayer));
+    }
+
+    @Test
+    public void testColorize4() throws Exception {
+        assertEquals("&&" + a + "Hi", SRun("colorize('&&&&&aHi')", fakePlayer));
+    }
+
+    @Test
+    public void testColorize5() throws Exception {
+        assertEquals("&&", SRun("colorize('&&&&', '&&')", fakePlayer));
+    }
+
+    @Test
+    public void testColorize6() throws Exception {
+        assertEquals("&&" + a + "Hi", SRun("colorize('&&&&&&aHi', '&&')", fakePlayer));
+    }
 }

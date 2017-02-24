@@ -1,15 +1,14 @@
-
 package com.laytonsmith.abstraction.enums;
 
 import com.laytonsmith.annotations.MEnum;
 
 /**
  *
- * 
+ *
  */
 @MEnum("Instrument")
 public enum MCInstrument {
-	PIANO,
+    PIANO,
     BASS_DRUM,
     SNARE_DRUM,
     STICKS,

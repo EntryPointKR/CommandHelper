@@ -4,7 +4,6 @@ import com.laytonsmith.PureUtilities.ClassLoading.ClassDiscovery;
 import com.laytonsmith.PureUtilities.Common.StreamUtils;
 import com.laytonsmith.PureUtilities.DaemonManager;
 import com.laytonsmith.abstraction.blocks.MCMaterial;
-import com.laytonsmith.abstraction.enums.MCPotionType;
 import com.laytonsmith.abstraction.enums.MCRecipeType;
 import com.laytonsmith.annotations.convert;
 import com.laytonsmith.commandhelper.CommandHelperPlugin;
@@ -14,39 +13,41 @@ import java.util.Set;
 
 /**
  * Unfortunately some methods just can't be overridden.
- *
  */
 public final class StaticLayer {
 
-    private StaticLayer(){}
     //Do not rename this field, it is used reflectively in testing
     private static Convertor convertor = null;
-    static{
+
+    static {
         InitConvertor();
     }
 
-    private static synchronized void InitConvertor(){
+    private StaticLayer() {
+    }
+
+    private static synchronized void InitConvertor() {
         Set<Class<?>> classes = ClassDiscovery.getDefaultInstance().loadClassesWithAnnotation(convert.class);
-        for(Class<?> c : classes){
-            if(!Convertor.class.isAssignableFrom(c)){
+        for (Class<?> c : classes) {
+            if (!Convertor.class.isAssignableFrom(c)) {
                 StreamUtils.GetSystemErr().println("The Convertor " + c.getSimpleName() + " doesn't implement Convertor!");
             }
             convert convert = c.getAnnotation(convert.class);
-            if(convert.type() == Implementation.GetServerType()){
+            if (convert.type() == Implementation.GetServerType()) {
                 //This is what we're looking for, instatiate it.
-                try{
-                    if(convertor != null){
+                try {
+                    if (convertor != null) {
                         //Uh... There are more than one implementations for this server type
                         System.out.println("More than one Convertor for this server type was detected!");
                     }
                     convertor = (Convertor) c.newInstance();
                     //At this point we are all set
-                } catch(Exception e){
+                } catch (Exception e) {
                     StreamUtils.GetSystemErr().println("Tried to instantiate the Convertor, but couldn't!");
                 }
             }
         }
-        if(convertor == null){
+        if (convertor == null) {
             StreamUtils.GetSystemErr().println("Could not find a suitable convertor! You will experience serious issues with this plugin.");
         }
     }
@@ -59,51 +60,47 @@ public final class StaticLayer {
         return convertor.GetServerEventMixin();
     }
 
-    public static MCLocation GetLocation(MCWorld w, double x, double y, double z){
+    public static MCLocation GetLocation(MCWorld w, double x, double y, double z) {
         return GetLocation(w, x, y, z, 0, 0);
     }
 
-	public static MCItemStack GetItemStack(int type, int qty) {
-		return convertor.GetItemStack(type, qty);
-	}
+    public static MCItemStack GetItemStack(int type, int qty) {
+        return convertor.GetItemStack(type, qty);
+    }
 
-	public static MCItemStack GetItemStack(int type, int data, int qty){
-		return convertor.GetItemStack(type, data, qty);
-	}
+    public static MCItemStack GetItemStack(int type, int data, int qty) {
+        return convertor.GetItemStack(type, data, qty);
+    }
 
-	public static MCItemStack GetItemStack(String type, int qty) {
-		return convertor.GetItemStack(type, qty);
-	}
+    public static MCItemStack GetItemStack(String type, int qty) {
+        return convertor.GetItemStack(type, qty);
+    }
 
-	public static MCItemStack GetItemStack(String type, int data, int qty){
-		return convertor.GetItemStack(type, data, qty);
-	}
+    public static MCItemStack GetItemStack(String type, int data, int qty) {
+        return convertor.GetItemStack(type, data, qty);
+    }
 
-	public static MCItemStack GetItemStack(MCMaterial type, int qty) {
-		return convertor.GetItemStack(type, qty);
-	}
+    public static MCItemStack GetItemStack(MCMaterial type, int qty) {
+        return convertor.GetItemStack(type, qty);
+    }
 
-	public static MCItemStack GetItemStack(MCMaterial type, int data, int qty){
-		return convertor.GetItemStack(type, data, qty);
-	}
+    public static MCItemStack GetItemStack(MCMaterial type, int data, int qty) {
+        return convertor.GetItemStack(type, data, qty);
+    }
 
-	public static MCPotionData GetPotionData(MCPotionType type, boolean extended, boolean upgraded){
-		return convertor.GetPotionData(type, extended, upgraded);
-	}
-
-    public static MCServer GetServer(){
+    public static MCServer GetServer() {
         return convertor.GetServer();
     }
 
-    public static MCEnchantment GetEnchantmentByName(String name){
+    public static MCEnchantment GetEnchantmentByName(String name) {
         return convertor.GetEnchantmentByName(name);
     }
 
-	public static MCMaterial GetMaterial(String name) {
-		return convertor.GetMaterial(name);
-	}
+    public static MCMaterial GetMaterial(String name) {
+        return convertor.GetMaterial(name);
+    }
 
-    public static MCEnchantment[] GetEnchantmentValues(){
+    public static MCEnchantment[] GetEnchantmentValues() {
         return convertor.GetEnchantmentValues();
     }
 
@@ -111,40 +108,43 @@ public final class StaticLayer {
         convertor.Startup(chp);
     }
 
-	public static MCMetadataValue GetMetadataValue(Object value, MCPlugin plugin) {
-		return convertor.GetMetadataValue(value, plugin);
-	}
+    public static MCMetadataValue GetMetadataValue(Object value, MCPlugin plugin) {
+        return convertor.GetMetadataValue(value, plugin);
+    }
 
     /**
      * Returns the data value of the specified material name, or -1 if none was found.
+     *
      * @param materialName
      * @return
      */
-    public static int LookupItemId(String materialName){
+    public static int LookupItemId(String materialName) {
         return convertor.LookupItemId(materialName);
     }
 
     /**
      * Returns the name of the material, given the material's ID.
+     *
      * @param id
      * @return
      */
-    public static String LookupMaterialName(int id){
+    public static String LookupMaterialName(int id) {
         return convertor.LookupMaterialName(id);
     }
 
     /**
      * Adds a runnable to the main thread, if required by this platform,
      * if a multithreaded user code would be dangerous.
+     *
      * @param ms
      * @param r
      * @return
      */
-    public static int SetFutureRunnable(DaemonManager dm, long ms, Runnable r){
+    public static int SetFutureRunnable(DaemonManager dm, long ms, Runnable r) {
         return convertor.SetFutureRunnable(dm, ms, r);
     }
 
-    public static int SetFutureRepeater(DaemonManager dm, long ms, long initialDelay, Runnable r){
+    public static int SetFutureRepeater(DaemonManager dm, long ms, long initialDelay, Runnable r) {
         return convertor.SetFutureRepeater(dm, ms, initialDelay, r);
     }
 
@@ -152,7 +152,7 @@ public final class StaticLayer {
         convertor.ClearAllRunnables();
     }
 
-    public static void ClearFutureRunnable(int id){
+    public static void ClearFutureRunnable(int id) {
         convertor.ClearFutureRunnable(id);
     }
 
@@ -160,6 +160,7 @@ public final class StaticLayer {
      * Given an entity, returns the more specific entity type, by creating a new more
      * specific type based on the actual type of the underlying object contained by the
      * more generic type.
+     *
      * @param e
      * @return
      */
@@ -167,19 +168,19 @@ public final class StaticLayer {
         return convertor.GetCorrectEntity(e);
     }
 
-	public static MCRecipe GetNewRecipe(MCRecipeType type, MCItemStack result) {
-		return convertor.GetNewRecipe(type, result);
-	}
+    public static MCRecipe GetNewRecipe(MCRecipeType type, MCItemStack result) {
+        return convertor.GetNewRecipe(type, result);
+    }
 
-	public static String GetPluginName() {
-		return convertor.GetPluginName();
-	}
+    public static String GetPluginName() {
+        return convertor.GetPluginName();
+    }
 
-	public static MCPlugin GetPlugin() {
-		return convertor.GetPlugin();
-	}
+    public static MCPlugin GetPlugin() {
+        return convertor.GetPlugin();
+    }
 
-	public static synchronized Convertor GetConvertor(){
-		return convertor;
-	}
+    public static synchronized Convertor GetConvertor() {
+        return convertor;
+    }
 }

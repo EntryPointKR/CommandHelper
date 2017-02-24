@@ -10,7 +10,6 @@ import java.util.List;
  * which will be automatically parsed and validated. Additionally,
  * automatically generated help text can be retrieved and displayed, perhaps
  * if a --help argument is present.
- * 
  */
 public class ArgumentParser {
 
@@ -19,6 +18,90 @@ public class ArgumentParser {
      */
     String description = "";
     List<Argument> argumentModel = new ArrayList<Argument>();
+
+    private ArgumentParser() {
+    }
+
+    public static ArgumentParser GetParser() {
+        return new ArgumentParser();
+    }
+
+    /**
+     * Returns a simple List of the arguments, parsed into a proper argument list.
+     * This will work essentially identically to how general shell arguments are parsed.
+     *
+     * @param args
+     * @return
+     */
+    static List<String> lex(String args) {
+        //First, we have to tokenize the strings. Since we can have quoted arguments, we can't simply split on spaces.
+        List<String> arguments = new ArrayList<String>();
+        StringBuilder buf = new StringBuilder();
+        boolean state_in_single_quote = false;
+        boolean state_in_double_quote = false;
+        for (int i = 0; i < args.length(); i++) {
+            Character c0 = args.charAt(i);
+            Character c1 = i + 1 < args.length() ? args.charAt(i + 1) : null;
+
+            if (c0 == '\\') {
+                if (c1 == '\'' && state_in_single_quote
+                        || c1 == '"' && state_in_double_quote
+                        || c1 == ' ' && !state_in_double_quote && !state_in_single_quote
+                        || c1 == '\\' && (state_in_double_quote || state_in_single_quote)) {
+                    //We are escaping the next character. Add it to the buffer instead, and
+                    //skip ahead two
+                    buf.append(c1);
+                    i++;
+                    continue;
+                }
+
+            }
+
+            if (c0 == ' ') {
+                if (!state_in_double_quote && !state_in_single_quote) {
+                    //argument split
+                    if (buf.length() != 0) {
+                        arguments.add(buf.toString());
+                        buf = new StringBuilder();
+                    }
+                    continue;
+                }
+            }
+            if (c0 == '\'' && !state_in_double_quote) {
+                if (state_in_single_quote) {
+                    state_in_single_quote = false;
+                    arguments.add(buf.toString());
+                    buf = new StringBuilder();
+                } else {
+                    if (buf.length() != 0) {
+                        arguments.add(buf.toString());
+                        buf = new StringBuilder();
+                    }
+                    state_in_single_quote = true;
+                }
+                continue;
+            }
+            if (c0 == '"' && !state_in_single_quote) {
+                if (state_in_double_quote) {
+                    state_in_double_quote = false;
+                    arguments.add(buf.toString());
+                    buf = new StringBuilder();
+                } else {
+                    if (buf.length() != 0) {
+                        arguments.add(buf.toString());
+                        buf = new StringBuilder();
+                    }
+                    state_in_double_quote = true;
+                }
+                continue;
+            }
+            buf.append(c0);
+        }
+        if (buf.length() != 0) {
+            arguments.add(buf.toString());
+        }
+        return arguments;
+    }
 
     /**
      * Returns the default argument, if it exists.
@@ -58,485 +141,6 @@ public class ArgumentParser {
         return null;
     }
 
-    private class Argument {
-
-        Character shortArg;
-        String longArg;
-        Type argType;
-        String defaultVal;
-        List<String> defaultList;
-        String description;
-        String usageName;
-        boolean required;
-        String singleVal;
-        List<String> arrayVal;
-
-        private Argument(Argument arg) {
-            if (arg == null) {
-                return;
-            }
-            this.shortArg = arg.shortArg;
-            this.longArg = arg.longArg;
-            this.argType = arg.argType;
-            this.defaultVal = arg.defaultVal;
-            this.description = arg.description;
-            this.usageName = arg.usageName;
-            this.required = arg.required;
-        }
-
-        private Argument(Character shortArg, String longArg, Type argType, String defaultVal, String description, String usageName, boolean required) {
-            this.shortArg = shortArg;
-            this.longArg = longArg;
-            this.argType = argType;
-            this.description = description;
-
-            this.defaultVal = defaultVal;
-            if (isArray() && defaultVal != null) {
-                defaultList = ArgumentParser.this.lex(defaultVal);
-            }
-            this.usageName = usageName;
-            this.required = required;
-        }
-
-        public final boolean isFlag() {
-            return argType == Type.BOOLEAN;
-        }
-
-        public final boolean isArray() {
-            return argType == Type.ARRAY_OF_NUMBERS || argType == Type.ARRAY_OF_STRINGS;
-        }
-
-        public final boolean isSingle() {
-            return argType == Type.NUMBER || argType == Type.STRING;
-        }
-
-        public final boolean isNumeric() {
-            return argType == Type.NUMBER || argType == Type.ARRAY_OF_NUMBERS;
-        }
-
-        private void setValue(String val) {
-            if (isArray()) {
-                arrayVal = ArgumentParser.this.lex(val);
-            } else {
-                singleVal = val;
-            }
-        }
-
-        private void setValue(List<String> val) {
-            arrayVal = new ArrayList<>(val);
-        }
-
-        public boolean modelEquals(Argument obj) {
-            if (this.shortArg != null) {
-                return this.shortArg.equals(obj.shortArg);
-            } else if (this.longArg != null) {
-                return this.longArg.equals(obj.longArg);
-            } else {
-                return obj.shortArg == null && obj.longArg == null;
-            }
-        }
-
-        @Override
-        public String toString() {
-            StringBuilder b = new StringBuilder();
-            if (longArg != null && shortArg != null) {
-                b.append("--").append(longArg).append("/").append("-").append(shortArg);
-            } else if (longArg != null) {
-                b.append("--").append(longArg);
-            } else if (shortArg != null) {
-                b.append("-").append(shortArg);
-            }
-            b.append(": ");
-            if (isSingle()) {
-                b.append(singleVal);
-            } else if (isArray()) {
-                boolean first = true;
-                b.append("[");
-                for (String s : arrayVal) {
-                    if (!first) {
-                        b.append(", ");
-                    }
-                    first = false;
-                    b.append("\"").append(s.replaceAll("\"", "\\\"")).append("\"");
-                }
-                b.append("]");
-            }
-            b.append("\n");
-            return b.toString();
-        }
-
-        private String generateDescription(boolean shortCode) {
-            StringBuilder b = new StringBuilder();
-            b.append("\t");
-            if (shortArg == null && longArg == null) {
-                //Default argument
-                b.append("<").append(usageName).append(">: ").append(description).append("\n");
-            } else {
-                //If short code is false, we need to check to see if there is a short code, if so,
-                //this is an alias.
-                if (shortCode) {
-                    b.append("-").append(shortArg);
-                } else {
-                    b.append("--").append(longArg);
-                }
-                b.append(": ");
-
-                if (!shortCode && shortArg != null) {
-                    //Alias
-                    b.append("Alias to -").append(shortArg);
-                } else {
-                    if (argType != Type.BOOLEAN) {
-                        if (required) {
-                            b.append("Required. ");
-                        } else {
-                            b.append("Optional. ");
-                        }
-                    }
-                    if (argType == Type.NUMBER) {
-                        b.append("A numeric value. ");
-                    }
-                    if (argType == Type.ARRAY_OF_NUMBERS) {
-                        b.append("A list of numbers. ");
-                    }
-                    if (argType == Type.ARRAY_OF_STRINGS) {
-                        b.append("A list. ");
-                    }
-                    b.append(description.replaceAll("\n", "\n\t\t"));
-                }
-                b.append("\n");
-            }
-            return b.toString();
-        }
-    }
-
-    private ArgumentParser() {
-    }
-
-    public static class ValidationException extends Exception {
-
-        private ValidationException(String string) {
-            super(string);
-        }
-    }
-
-    public static class ResultUseException extends RuntimeException {
-
-        ResultUseException(String string) {
-            super(string);
-        }
-    }
-
-    public class ArgumentParserResults {
-
-        List<Argument> arguments = new ArrayList<Argument>();
-
-        private void updateArgument(Argument a) {
-            if (a == null) {
-                return;
-            }
-            List<Argument> toRemove = new ArrayList<Argument>();
-            for (Argument arg : arguments) {
-                if (arg.modelEquals(a)) {
-                    toRemove.add(arg);
-                }
-            }
-            for (Argument arg : toRemove) {
-                arguments.remove(arg);
-            }
-            arguments.add(a);
-        }
-
-        /**
-         * Returns true if the flag represented by this short code is set.
-         *
-         * @param flag
-         * @return
-         */
-        public boolean isFlagSet(Character flag) {
-            return getArg(flag) != null;
-        }
-
-        /**
-         * Returns true is the flag represented by this long code is set.
-         *
-         * @param flag
-         * @return
-         */
-        public boolean isFlagSet(String flag) {
-            return getArg(flag) != null;
-        }
-
-        /**
-         * Gets the unassociated arguments passed in as a String. For instance,
-         * if the arguments were
-         * <code>These are arguments</code>, then "These are arguments" will be
-         * returned. However, assuming -c is registered as a single string type,
-         * and the arguments are
-         * <code>-c These are arguments</code>, then only "are arguments" is
-         * returned. This will return an empty string if no arguments were set.
-         *
-         * @return
-         */
-        public String getStringArgument() {
-            try {
-                Argument a = getArg();
-                if (a.arrayVal == null) {
-                    return "";
-                }
-                StringBuilder b = new StringBuilder();
-                boolean first = true;
-                for (String val : a.arrayVal) {
-                    if (!first) {
-                        b.append(" ");
-                    }
-                    first = false;
-                    b.append(val);
-                }
-                return b.toString();
-            }
-            catch (ResultUseException e) {
-                return "";
-            }
-        }
-
-        /**
-         * Returns the string associated with the switch represented by this
-         * short code. If the switch wasn't set, null is returned.
-         *
-         * @param flag
-         * @return
-         * @throws ArgumentParser.ResultUseException
-         */
-        public String getStringArgument(Character flag) throws ResultUseException {
-            return getStringArgument(getArg(flag));
-        }
-
-        /**
-         * Returns the string associated with the switch represented by this
-         * long code. If the switch wasn't set, null is returned.
-         *
-         * @param flag
-         * @return
-         * @throws ArgumentParser.ResultUseException
-         */
-        public String getStringArgument(String flag) throws ResultUseException {
-            return getStringArgument(getArg(flag));
-        }
-
-        private String getStringArgument(Argument arg) {
-            if (arg == null) {
-                return null;
-            }
-            if (arg.argType != Type.STRING) {
-                throw new ClassCastException("Argument type not set to " + Type.STRING.name() + ". Cannot return a " + "string" + ".");
-            }
-            return arg.singleVal;
-        }
-
-        /**
-         * Returns the value associated with the switch represented by this
-         * short code, pre-parsed as a double. If the switch wasn't set, null is
-         * returned.
-         *
-         * @param flag
-         * @return
-         * @throws ResultUseException, NumberFormatException
-         */
-        public Double getNumberArgument(Character flag) throws ResultUseException {
-            return getNumberArgument(getArg(flag));
-        }
-
-        /**
-         * Returns the value associated with the switch represented by this long
-         * code, pre-parsed as a double. If the switch wasn't set, null is
-         * returned.
-         *
-         * @param flag
-         * @return
-         * @throws ResultUseException, NumberFormatException
-         */
-        public Double getNumberArgument(String flag) throws ResultUseException {
-            return getNumberArgument(getArg(flag));
-        }
-
-        private Double getNumberArgument(Argument arg) {
-            if (arg == null) {
-                return null;
-            }
-            if (arg.argType != Type.NUMBER) {
-                throw new ClassCastException("Argument type not set to " + Type.NUMBER.name() + ". Cannot return a " + "number" + ".");
-            }
-            return Double.parseDouble(arg.singleVal);
-        }
-
-        /**
-         * Gets the unassociated arguments passed in as a List of Strings. For
-         * instance, if the arguments were
-         * <code>These are arguments</code>, then ["These", "are", "arguments"]
-         * will be returned. However, assuming -c is registered as a single
-         * string type, and the arguments are
-         * <code>-c These are arguments</code>, then only ["are", "arguments"]
-         * is returned. This will return an empty array if no arguments were
-         * set.
-         *
-         * @return
-         */
-        public List<String> getStringListArgument() {
-            try {
-                Argument a = getArg();
-                if (a.arrayVal == null) {
-                    return new ArrayList<String>();
-                }
-                return new ArrayList<String>(a.arrayVal);
-            }
-            catch (ResultUseException e) {
-                return new ArrayList<String>();
-            }
-        }
-
-        /**
-         * Returns the list of values associated with the switch represented by
-         * this short code. If the switch wasn't set, null is returned.
-         *
-         * @param flag
-         * @return
-         * @throws ArgumentParser.ResultUseException
-         */
-        public List<String> getStringListArgument(Character flag) throws ResultUseException {
-            return getStringListArgument(getArg(flag));
-        }
-
-        /**
-         * Returns the list of values associated with the switch represented by
-         * this long code. If the switch wasn't set, null is returned.
-         *
-         * @param flag
-         * @return
-         * @throws ArgumentParser.ResultUseException
-         */
-        public List<String> getStringListArgument(String flag) throws ResultUseException {
-            return getStringListArgument(getArg(flag));
-        }
-
-        private List<String> getStringListArgument(Argument arg) {
-            if (arg == null) {
-                return null;
-            }
-            if (arg.argType != Type.ARRAY_OF_STRINGS) {
-                throw new ClassCastException("Argument type not set to " + Type.ARRAY_OF_STRINGS.name() + ". Cannot return a " + "string list" + ".");
-            }
-            return new ArrayList<String>(arg.arrayVal);
-        }
-
-        /**
-         * Returns the list of values associated with the switch represented by
-         * this short code, pre-parsed into doubles. If the switch wasn't set,
-         * null is returned.
-         *
-         * @param flag
-         * @return
-         * @throws ArgumentParser.ResultUseException
-         */
-        public List<Double> getNumberListArgument(Character flag) throws ResultUseException {
-            return getNumberListArgument(getArg(flag));
-        }
-
-        /**
-         * Returns the list of values associated with the switch represented by
-         * this long code, pre-parsed into doubles. If the switch wasn't set,
-         * null is returned.
-         *
-         * @param flag
-         * @return
-         * @throws ArgumentParser.ResultUseException
-         */
-        public List<Double> getNumberListArgument(String flag) throws ResultUseException {
-            return getNumberListArgument(getArg(flag));
-        }
-
-        private List<Double> getNumberListArgument(Argument arg) {
-            if (arg == null) {
-                return null;
-            }
-            if (arg.argType != Type.ARRAY_OF_NUMBERS) {
-                throw new ClassCastException("Argument type not set to " + Type.ARRAY_OF_NUMBERS.name() + ". Cannot return a " + "number list" + ".");
-            }
-
-            List<Double> list = new ArrayList<Double>();
-            for (String s : arg.arrayVal) {
-                list.add(Double.parseDouble(s));
-            }
-            return list;
-        }
-
-        private Argument getArg() {
-            for (Argument a : arguments) {
-                if (a.shortArg == null && a.longArg == null) {
-                    return a;
-                }
-            }
-            return new Argument(ArgumentParser.this.getArgument());
-        }
-
-        private Argument getArg(Character flag) throws ResultUseException {
-            for (Argument a : arguments) {
-                if (a.shortArg == null) {
-                    continue;
-                }
-                if (a.shortArg.equals(flag)) {
-                    return a;
-                }
-            }
-            return null;
-        }
-
-        private Argument getArg(String flag) throws ResultUseException {
-            for (Argument a : arguments) {
-                if (a.longArg == null) {
-                    continue;
-                }
-                if (a.longArg.equals(flag)) {
-                    return a;
-                }
-            }
-            return null;
-        }
-
-        @Override
-        public String toString() {
-            StringBuilder b = new StringBuilder();
-            for (Argument arg : arguments) {
-                if (arg.isFlag()) {
-                    b.append("Flag ");
-                    if (arg.longArg != null && arg.shortArg != null) {
-                        b.append("--").append(arg.longArg).append("/").append("-").append(arg.shortArg);
-                    } else if (arg.longArg != null) {
-                        b.append("--").append(arg.longArg);
-                    } else if (arg.shortArg != null) {
-                        b.append("-").append(arg.shortArg);
-                    }
-                    b.append(" is set.\n");
-                } else {
-                    b.append(arg.toString());
-                }
-            }
-            return b.toString();
-        }
-    }
-
-    public static ArgumentParser GetParser() {
-        return new ArgumentParser();
-    }
-
-    public static enum Type {
-
-        STRING,
-        NUMBER,
-        ARRAY_OF_STRINGS,
-        ARRAY_OF_NUMBERS,
-        BOOLEAN
-    }
-
     private ArgumentParser addArgument0(Character shortArg, String longArg, Type argType, String defaultVal, String description, String usageName, boolean required) {
         //TODO: Make sure this switch doesn't already exist
         argumentModel.add(new Argument(shortArg, longArg, argType, defaultVal, description, usageName, required));
@@ -546,21 +150,21 @@ public class ArgumentParser {
     /**
      * Adds an argument to this argument parser. This is the most complex method
      * of adding an argument, all other methods are wrappers around this.
-     *
+     * <p>
      * The short code and long code for a switch both represent the underlying
      * switch, that is, they both "addresses" of a single underlying switch.
      * When accessing the argument later, you may use either the short code or
      * the long code to retrieve the value of the switch, but it is important to
      * understand that they are both pointing to the same item.
      *
-     * @param shortArg The short code for this switch.
-     * @param longArg The long code for this switch.
-     * @param argType The expected type of this switch.
-     * @param defaultVal The default value of this switch. If defaultVal is not
-     * null, the switch will always exist when calling get*Argument from the
-     * results. If argType is BOOLEAN, setting this will cause the switch to
+     * @param shortArg    The short code for this switch.
+     * @param longArg     The long code for this switch.
+     * @param argType     The expected type of this switch.
+     * @param defaultVal  The default value of this switch. If defaultVal is not
+     *                    null, the switch will always exist when calling get*Argument from the
+     *                    results. If argType is BOOLEAN, setting this will cause the switch to
      * @param description The description of this argument, which is used when
-     * building the help text created by getBuiltDescription.
+     *                    building the help text created by getBuiltDescription.
      * @return
      */
     public ArgumentParser addArgument(Character shortArg, String longArg, Type argType, String defaultVal, String description, String usageName, boolean required) {
@@ -820,24 +424,24 @@ public class ArgumentParser {
             }
             usage.append(">");
 
-			if(a.defaultVal != null && !"".equals(a.defaultVal)){
-				usage.append(" (default ");
-				if(a.argType == Type.STRING){
-					usage.append("\"");
-				}
-				usage.append(a.defaultVal);
-				if(a.argType == Type.STRING){
-					usage.append("\"");
-				}
-				usage.append(")");
-			}
-			
+            if (a.defaultVal != null && !"".equals(a.defaultVal)) {
+                usage.append(" (default ");
+                if (a.argType == Type.STRING) {
+                    usage.append("\"");
+                }
+                usage.append(a.defaultVal);
+                if (a.argType == Type.STRING) {
+                    usage.append("\"");
+                }
+                usage.append(")");
+            }
+
             if (!a.required) {
                 usage.append("]");
             }
             parts.add(usage.toString());
         }
-		
+
         //Now, if the default switch exists, put it here too
         if (getArgument() != null) {
             parts.add("<" + getArgument().usageName + ", ...>");
@@ -853,9 +457,9 @@ public class ArgumentParser {
                 first = false;
                 b.append(part);
             }
-			if(parts.isEmpty()){
-				usage.append("No arguments.");
-			}
+            if (parts.isEmpty()) {
+                usage.append("No arguments.");
+            }
             b.append(usage.toString());
         }
         b.append("\n\nOptions:\n\n");
@@ -873,16 +477,16 @@ public class ArgumentParser {
             b.append(flags.toString());
             b.append("\n");
         }
-		
-		if(shortCodes.isEmpty() && longCodes.isEmpty() && def == null && flags.length() == 0){
-			b.append("\tNo flags or options.\n");
-		} else {
-			if(shortCodes.isEmpty() && longCodes.isEmpty() && def == null){
-				b.append("\tNo options.\n");
-			} else if(flags.length() == 0){
-				b.append("\tNo flags.\n");
-			}
-		}
+
+        if (shortCodes.isEmpty() && longCodes.isEmpty() && def == null && flags.length() == 0) {
+            b.append("\tNo flags or options.\n");
+        } else {
+            if (shortCodes.isEmpty() && longCodes.isEmpty() && def == null) {
+                b.append("\tNo options.\n");
+            } else if (flags.length() == 0) {
+                b.append("\tNo flags.\n");
+            }
+        }
 
         for (Character c : shortCodes) {
             if (!shortCodesDone.contains(c)) {
@@ -896,15 +500,16 @@ public class ArgumentParser {
         }
         return b.toString();
     }
-	
-	/**
-	 * Returns just the description that was registered with {@see #addDescription(String)}.
-	 * @return The description, or null, if one has not been set yet.
-	 * @see #getBuiltDescription()
-	 */
-	public String getDescription(){
-		return description;
-	}
+
+    /**
+     * Returns just the description that was registered with {@see #addDescription(String)}.
+     *
+     * @return The description, or null, if one has not been set yet.
+     * @see #getBuiltDescription()
+     */
+    public String getDescription() {
+        return description;
+    }
 
     /**
      * This method takes a raw string, which represents the arguments as a
@@ -926,96 +531,20 @@ public class ArgumentParser {
         return parse(lex(args));
     }
 
-	/**
-	 * Returns a simple List of the arguments, parsed into a proper argument list.
-	 * This will work essentially identically to how general shell arguments are parsed.
-	 * @param args
-	 * @return 
-	 */
-    static List<String> lex(String args) {
-        //First, we have to tokenize the strings. Since we can have quoted arguments, we can't simply split on spaces.
-        List<String> arguments = new ArrayList<String>();
-        StringBuilder buf = new StringBuilder();
-        boolean state_in_single_quote = false;
-        boolean state_in_double_quote = false;
-        for (int i = 0; i < args.length(); i++) {
-            Character c0 = args.charAt(i);
-            Character c1 = i + 1 < args.length() ? args.charAt(i + 1) : null;
-
-            if (c0 == '\\') {
-                if (c1 == '\'' && state_in_single_quote
-                        || c1 == '"' && state_in_double_quote
-                        || c1 == ' ' && !state_in_double_quote && !state_in_single_quote
-                        || c1 == '\\' && ( state_in_double_quote || state_in_single_quote )) {
-                    //We are escaping the next character. Add it to the buffer instead, and
-                    //skip ahead two
-                    buf.append(c1);
-                    i++;
-                    continue;
-                }
-
-            }
-
-            if (c0 == ' ') {
-                if (!state_in_double_quote && !state_in_single_quote) {
-                    //argument split
-                    if (buf.length() != 0) {
-                        arguments.add(buf.toString());
-                        buf = new StringBuilder();
-                    }
-                    continue;
-                }
-            }
-            if (c0 == '\'' && !state_in_double_quote) {
-                if (state_in_single_quote) {
-                    state_in_single_quote = false;
-                    arguments.add(buf.toString());
-                    buf = new StringBuilder();
-                } else {
-                    if (buf.length() != 0) {
-                        arguments.add(buf.toString());
-                        buf = new StringBuilder();
-                    }
-                    state_in_single_quote = true;
-                }
-                continue;
-            }
-            if (c0 == '"' && !state_in_single_quote) {
-                if (state_in_double_quote) {
-                    state_in_double_quote = false;
-                    arguments.add(buf.toString());
-                    buf = new StringBuilder();
-                } else {
-                    if (buf.length() != 0) {
-                        arguments.add(buf.toString());
-                        buf = new StringBuilder();
-                    }
-                    state_in_double_quote = true;
-                }
-                continue;
-            }
-            buf.append(c0);
-        }
-        if (buf.length() != 0) {
-            arguments.add(buf.toString());
-        }
-        return arguments;
-    }
-
     private ArgumentParserResults parse(List<String> args) throws ValidationException {
         ArgumentParserResults results = new ArgumentParserResults();
         //Fill in results with all the defaults
         for (Argument arg : argumentModel) {
             if (arg.defaultVal != null) {
                 //For flags, we simply don't add them if they default to false.
-                if (!arg.isFlag() || ( arg.isFlag() && arg.defaultVal != null )) {
+                if (!arg.isFlag() || (arg.isFlag() && arg.defaultVal != null)) {
                     Argument newArg = new Argument(arg);
                     newArg.setValue(arg.defaultVal);
                     results.updateArgument(newArg);
                 }
             }
         }
-        //These are arguments that are not flags. 
+        //These are arguments that are not flags.
         List<String> looseArgs = new ArrayList<>();
         Argument lastArg = null;
         for (String arg : args) {
@@ -1047,9 +576,9 @@ public class ArgumentParser {
                 for (int i = 1; i < arg.length(); i++) {
                     Character c = arg.charAt(i);
                     Argument vArg = getArgument(c);
-					if(vArg == null){
-						throw new ValidationException("Unrecognized flag: " + c);
-					}
+                    if (vArg == null) {
+                        throw new ValidationException("Unrecognized flag: " + c);
+                    }
                     if (!vArg.isFlag() && hasNonFlagArg) {
                         //We have already come across a non-flag argument, and since this one isn't
                         //a flag, we need to throw an exception.
@@ -1071,17 +600,17 @@ public class ArgumentParser {
                 }
                 continue;
             }
-			
-			//It's just a loose arg, so we'll add it to the list and deal with it at the end
-			looseArgs.add(arg);
+
+            //It's just a loose arg, so we'll add it to the list and deal with it at the end
+            looseArgs.add(arg);
         }
 
         //Finish up the last argument
         results.updateArgument(validateArgument(lastArg, looseArgs));
-		if(looseArgs.size() > 0){
-			//There are loose arguments left, so add them to the loose argument list.
-			results.updateArgument(validateArgument(null, looseArgs));
-		}
+        if (looseArgs.size() > 0) {
+            //There are loose arguments left, so add them to the loose argument list.
+            results.updateArgument(validateArgument(null, looseArgs));
+        }
         //TODO: Check to see if all the required values are here
 
         return results;
@@ -1089,20 +618,20 @@ public class ArgumentParser {
 
     private Argument validateArgument(Argument arg, List<String> looseArgs) throws ValidationException {
         if (arg == null) {
-			if(!looseArgs.isEmpty()){
-				//All the loose arguments are accounted for. Either we're done with the arguments,
-				//or we just hit a -(-)specifier, so we can stop parsing these, and go ahead and
-				//add them to the results.
-				Argument a = new Argument(ArgumentParser.this.getArgument());
-				a.setValue(looseArgs);
-				looseArgs.clear();
-				return a;
-			}
+            if (!looseArgs.isEmpty()) {
+                //All the loose arguments are accounted for. Either we're done with the arguments,
+                //or we just hit a -(-)specifier, so we can stop parsing these, and go ahead and
+                //add them to the results.
+                Argument a = new Argument(ArgumentParser.this.getArgument());
+                a.setValue(looseArgs);
+                looseArgs.clear();
+                return a;
+            }
             return null;
         }
         Argument finishedArgument = new Argument(arg);
         if (arg.isSingle()) {
-            //Just the first loose argument is associated with this argument, 
+            //Just the first loose argument is associated with this argument,
             //the rest (if any) belong to the default loose argument list.
             //Of course, looseArgs could be empty, in which case we won't add anything to the list.
             if (looseArgs.size() > 0) {
@@ -1112,8 +641,7 @@ public class ArgumentParser {
                 if (arg.isNumeric()) {
                     try {
                         Double.parseDouble(looseArg);
-                    }
-                    catch (NumberFormatException e) {
+                    } catch (NumberFormatException e) {
                         throw new ValidationException("Expecting a numeric value, but \"" + looseArg + "\" was encountered.");
                     }
                 }
@@ -1126,8 +654,7 @@ public class ArgumentParser {
                 for (String val : looseArgs) {
                     try {
                         Double.parseDouble(val);
-                    }
-                    catch (NumberFormatException e) {
+                    } catch (NumberFormatException e) {
                         throw new ValidationException("Expecting a numeric value, but \"" + val + "\" was encountered.");
                     }
                 }
@@ -1150,5 +677,475 @@ public class ArgumentParser {
      */
     public ArgumentParserResults match(String[] args) throws ValidationException {
         return parse(Arrays.asList(args));
+    }
+
+    public static enum Type {
+
+        STRING,
+        NUMBER,
+        ARRAY_OF_STRINGS,
+        ARRAY_OF_NUMBERS,
+        BOOLEAN
+    }
+
+    public static class ValidationException extends Exception {
+
+        private ValidationException(String string) {
+            super(string);
+        }
+    }
+
+    public static class ResultUseException extends RuntimeException {
+
+        ResultUseException(String string) {
+            super(string);
+        }
+    }
+
+    private class Argument {
+
+        Character shortArg;
+        String longArg;
+        Type argType;
+        String defaultVal;
+        List<String> defaultList;
+        String description;
+        String usageName;
+        boolean required;
+        String singleVal;
+        List<String> arrayVal;
+
+        private Argument(Argument arg) {
+            if (arg == null) {
+                return;
+            }
+            this.shortArg = arg.shortArg;
+            this.longArg = arg.longArg;
+            this.argType = arg.argType;
+            this.defaultVal = arg.defaultVal;
+            this.description = arg.description;
+            this.usageName = arg.usageName;
+            this.required = arg.required;
+        }
+
+        private Argument(Character shortArg, String longArg, Type argType, String defaultVal, String description, String usageName, boolean required) {
+            this.shortArg = shortArg;
+            this.longArg = longArg;
+            this.argType = argType;
+            this.description = description;
+
+            this.defaultVal = defaultVal;
+            if (isArray() && defaultVal != null) {
+                defaultList = ArgumentParser.this.lex(defaultVal);
+            }
+            this.usageName = usageName;
+            this.required = required;
+        }
+
+        public final boolean isFlag() {
+            return argType == Type.BOOLEAN;
+        }
+
+        public final boolean isArray() {
+            return argType == Type.ARRAY_OF_NUMBERS || argType == Type.ARRAY_OF_STRINGS;
+        }
+
+        public final boolean isSingle() {
+            return argType == Type.NUMBER || argType == Type.STRING;
+        }
+
+        public final boolean isNumeric() {
+            return argType == Type.NUMBER || argType == Type.ARRAY_OF_NUMBERS;
+        }
+
+        private void setValue(String val) {
+            if (isArray()) {
+                arrayVal = ArgumentParser.this.lex(val);
+            } else {
+                singleVal = val;
+            }
+        }
+
+        private void setValue(List<String> val) {
+            arrayVal = new ArrayList<>(val);
+        }
+
+        public boolean modelEquals(Argument obj) {
+            if (this.shortArg != null) {
+                return this.shortArg.equals(obj.shortArg);
+            } else if (this.longArg != null) {
+                return this.longArg.equals(obj.longArg);
+            } else {
+                return obj.shortArg == null && obj.longArg == null;
+            }
+        }
+
+        @Override
+        public String toString() {
+            StringBuilder b = new StringBuilder();
+            if (longArg != null && shortArg != null) {
+                b.append("--").append(longArg).append("/").append("-").append(shortArg);
+            } else if (longArg != null) {
+                b.append("--").append(longArg);
+            } else if (shortArg != null) {
+                b.append("-").append(shortArg);
+            }
+            b.append(": ");
+            if (isSingle()) {
+                b.append(singleVal);
+            } else if (isArray()) {
+                boolean first = true;
+                b.append("[");
+                for (String s : arrayVal) {
+                    if (!first) {
+                        b.append(", ");
+                    }
+                    first = false;
+                    b.append("\"").append(s.replaceAll("\"", "\\\"")).append("\"");
+                }
+                b.append("]");
+            }
+            b.append("\n");
+            return b.toString();
+        }
+
+        private String generateDescription(boolean shortCode) {
+            StringBuilder b = new StringBuilder();
+            b.append("\t");
+            if (shortArg == null && longArg == null) {
+                //Default argument
+                b.append("<").append(usageName).append(">: ").append(description).append("\n");
+            } else {
+                //If short code is false, we need to check to see if there is a short code, if so,
+                //this is an alias.
+                if (shortCode) {
+                    b.append("-").append(shortArg);
+                } else {
+                    b.append("--").append(longArg);
+                }
+                b.append(": ");
+
+                if (!shortCode && shortArg != null) {
+                    //Alias
+                    b.append("Alias to -").append(shortArg);
+                } else {
+                    if (argType != Type.BOOLEAN) {
+                        if (required) {
+                            b.append("Required. ");
+                        } else {
+                            b.append("Optional. ");
+                        }
+                    }
+                    if (argType == Type.NUMBER) {
+                        b.append("A numeric value. ");
+                    }
+                    if (argType == Type.ARRAY_OF_NUMBERS) {
+                        b.append("A list of numbers. ");
+                    }
+                    if (argType == Type.ARRAY_OF_STRINGS) {
+                        b.append("A list. ");
+                    }
+                    b.append(description.replaceAll("\n", "\n\t\t"));
+                }
+                b.append("\n");
+            }
+            return b.toString();
+        }
+    }
+
+    public class ArgumentParserResults {
+
+        List<Argument> arguments = new ArrayList<Argument>();
+
+        private void updateArgument(Argument a) {
+            if (a == null) {
+                return;
+            }
+            List<Argument> toRemove = new ArrayList<Argument>();
+            for (Argument arg : arguments) {
+                if (arg.modelEquals(a)) {
+                    toRemove.add(arg);
+                }
+            }
+            for (Argument arg : toRemove) {
+                arguments.remove(arg);
+            }
+            arguments.add(a);
+        }
+
+        /**
+         * Returns true if the flag represented by this short code is set.
+         *
+         * @param flag
+         * @return
+         */
+        public boolean isFlagSet(Character flag) {
+            return getArg(flag) != null;
+        }
+
+        /**
+         * Returns true is the flag represented by this long code is set.
+         *
+         * @param flag
+         * @return
+         */
+        public boolean isFlagSet(String flag) {
+            return getArg(flag) != null;
+        }
+
+        /**
+         * Gets the unassociated arguments passed in as a String. For instance,
+         * if the arguments were
+         * <code>These are arguments</code>, then "These are arguments" will be
+         * returned. However, assuming -c is registered as a single string type,
+         * and the arguments are
+         * <code>-c These are arguments</code>, then only "are arguments" is
+         * returned. This will return an empty string if no arguments were set.
+         *
+         * @return
+         */
+        public String getStringArgument() {
+            try {
+                Argument a = getArg();
+                if (a.arrayVal == null) {
+                    return "";
+                }
+                StringBuilder b = new StringBuilder();
+                boolean first = true;
+                for (String val : a.arrayVal) {
+                    if (!first) {
+                        b.append(" ");
+                    }
+                    first = false;
+                    b.append(val);
+                }
+                return b.toString();
+            } catch (ResultUseException e) {
+                return "";
+            }
+        }
+
+        /**
+         * Returns the string associated with the switch represented by this
+         * short code. If the switch wasn't set, null is returned.
+         *
+         * @param flag
+         * @return
+         * @throws ArgumentParser.ResultUseException
+         */
+        public String getStringArgument(Character flag) throws ResultUseException {
+            return getStringArgument(getArg(flag));
+        }
+
+        /**
+         * Returns the string associated with the switch represented by this
+         * long code. If the switch wasn't set, null is returned.
+         *
+         * @param flag
+         * @return
+         * @throws ArgumentParser.ResultUseException
+         */
+        public String getStringArgument(String flag) throws ResultUseException {
+            return getStringArgument(getArg(flag));
+        }
+
+        private String getStringArgument(Argument arg) {
+            if (arg == null) {
+                return null;
+            }
+            if (arg.argType != Type.STRING) {
+                throw new ClassCastException("Argument type not set to " + Type.STRING.name() + ". Cannot return a " + "string" + ".");
+            }
+            return arg.singleVal;
+        }
+
+        /**
+         * Returns the value associated with the switch represented by this
+         * short code, pre-parsed as a double. If the switch wasn't set, null is
+         * returned.
+         *
+         * @param flag
+         * @return
+         * @throws ResultUseException, NumberFormatException
+         */
+        public Double getNumberArgument(Character flag) throws ResultUseException {
+            return getNumberArgument(getArg(flag));
+        }
+
+        /**
+         * Returns the value associated with the switch represented by this long
+         * code, pre-parsed as a double. If the switch wasn't set, null is
+         * returned.
+         *
+         * @param flag
+         * @return
+         * @throws ResultUseException, NumberFormatException
+         */
+        public Double getNumberArgument(String flag) throws ResultUseException {
+            return getNumberArgument(getArg(flag));
+        }
+
+        private Double getNumberArgument(Argument arg) {
+            if (arg == null) {
+                return null;
+            }
+            if (arg.argType != Type.NUMBER) {
+                throw new ClassCastException("Argument type not set to " + Type.NUMBER.name() + ". Cannot return a " + "number" + ".");
+            }
+            return Double.parseDouble(arg.singleVal);
+        }
+
+        /**
+         * Gets the unassociated arguments passed in as a List of Strings. For
+         * instance, if the arguments were
+         * <code>These are arguments</code>, then ["These", "are", "arguments"]
+         * will be returned. However, assuming -c is registered as a single
+         * string type, and the arguments are
+         * <code>-c These are arguments</code>, then only ["are", "arguments"]
+         * is returned. This will return an empty array if no arguments were
+         * set.
+         *
+         * @return
+         */
+        public List<String> getStringListArgument() {
+            try {
+                Argument a = getArg();
+                if (a.arrayVal == null) {
+                    return new ArrayList<String>();
+                }
+                return new ArrayList<String>(a.arrayVal);
+            } catch (ResultUseException e) {
+                return new ArrayList<String>();
+            }
+        }
+
+        /**
+         * Returns the list of values associated with the switch represented by
+         * this short code. If the switch wasn't set, null is returned.
+         *
+         * @param flag
+         * @return
+         * @throws ArgumentParser.ResultUseException
+         */
+        public List<String> getStringListArgument(Character flag) throws ResultUseException {
+            return getStringListArgument(getArg(flag));
+        }
+
+        /**
+         * Returns the list of values associated with the switch represented by
+         * this long code. If the switch wasn't set, null is returned.
+         *
+         * @param flag
+         * @return
+         * @throws ArgumentParser.ResultUseException
+         */
+        public List<String> getStringListArgument(String flag) throws ResultUseException {
+            return getStringListArgument(getArg(flag));
+        }
+
+        private List<String> getStringListArgument(Argument arg) {
+            if (arg == null) {
+                return null;
+            }
+            if (arg.argType != Type.ARRAY_OF_STRINGS) {
+                throw new ClassCastException("Argument type not set to " + Type.ARRAY_OF_STRINGS.name() + ". Cannot return a " + "string list" + ".");
+            }
+            return new ArrayList<String>(arg.arrayVal);
+        }
+
+        /**
+         * Returns the list of values associated with the switch represented by
+         * this short code, pre-parsed into doubles. If the switch wasn't set,
+         * null is returned.
+         *
+         * @param flag
+         * @return
+         * @throws ArgumentParser.ResultUseException
+         */
+        public List<Double> getNumberListArgument(Character flag) throws ResultUseException {
+            return getNumberListArgument(getArg(flag));
+        }
+
+        /**
+         * Returns the list of values associated with the switch represented by
+         * this long code, pre-parsed into doubles. If the switch wasn't set,
+         * null is returned.
+         *
+         * @param flag
+         * @return
+         * @throws ArgumentParser.ResultUseException
+         */
+        public List<Double> getNumberListArgument(String flag) throws ResultUseException {
+            return getNumberListArgument(getArg(flag));
+        }
+
+        private List<Double> getNumberListArgument(Argument arg) {
+            if (arg == null) {
+                return null;
+            }
+            if (arg.argType != Type.ARRAY_OF_NUMBERS) {
+                throw new ClassCastException("Argument type not set to " + Type.ARRAY_OF_NUMBERS.name() + ". Cannot return a " + "number list" + ".");
+            }
+
+            List<Double> list = new ArrayList<Double>();
+            for (String s : arg.arrayVal) {
+                list.add(Double.parseDouble(s));
+            }
+            return list;
+        }
+
+        private Argument getArg() {
+            for (Argument a : arguments) {
+                if (a.shortArg == null && a.longArg == null) {
+                    return a;
+                }
+            }
+            return new Argument(ArgumentParser.this.getArgument());
+        }
+
+        private Argument getArg(Character flag) throws ResultUseException {
+            for (Argument a : arguments) {
+                if (a.shortArg == null) {
+                    continue;
+                }
+                if (a.shortArg.equals(flag)) {
+                    return a;
+                }
+            }
+            return null;
+        }
+
+        private Argument getArg(String flag) throws ResultUseException {
+            for (Argument a : arguments) {
+                if (a.longArg == null) {
+                    continue;
+                }
+                if (a.longArg.equals(flag)) {
+                    return a;
+                }
+            }
+            return null;
+        }
+
+        @Override
+        public String toString() {
+            StringBuilder b = new StringBuilder();
+            for (Argument arg : arguments) {
+                if (arg.isFlag()) {
+                    b.append("Flag ");
+                    if (arg.longArg != null && arg.shortArg != null) {
+                        b.append("--").append(arg.longArg).append("/").append("-").append(arg.shortArg);
+                    } else if (arg.longArg != null) {
+                        b.append("--").append(arg.longArg);
+                    } else if (arg.shortArg != null) {
+                        b.append("-").append(arg.shortArg);
+                    }
+                    b.append(" is set.\n");
+                } else {
+                    b.append(arg.toString());
+                }
+            }
+            return b.toString();
+        }
     }
 }

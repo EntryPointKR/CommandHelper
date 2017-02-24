@@ -10,28 +10,29 @@ import org.hamcrest.TypeSafeMatcher;
  */
 public class CustomMatchers {
 
-	@Factory
-	public static <T> Matcher<String> regexMatch(String regex) {
-		return new RegexMatch(regex);
-	}
-	
-	private static class RegexMatch extends TypeSafeMatcher<String> {
+    @Factory
+    public static <T> Matcher<String> regexMatch(String regex) {
+        return new RegexMatch(regex);
+    }
 
-		String regex;
-		public RegexMatch(String regex) {
-			this.regex = regex;
-		}
+    private static class RegexMatch extends TypeSafeMatcher<String> {
 
-		@Override
-		protected boolean matchesSafely(String item) {
-			return item.matches(regex);
-		}
+        String regex;
 
-		@Override
-		public void describeTo(Description description) {
-			description.appendText("value to match regex " + regex);
-		}
-		
-	}
-	
+        public RegexMatch(String regex) {
+            this.regex = regex;
+        }
+
+        @Override
+        protected boolean matchesSafely(String item) {
+            return item.matches(regex);
+        }
+
+        @Override
+        public void describeTo(Description description) {
+            description.appendText("value to match regex " + regex);
+        }
+
+    }
+
 }

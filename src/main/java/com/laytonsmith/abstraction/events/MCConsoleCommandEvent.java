@@ -8,11 +8,12 @@ import com.laytonsmith.core.events.BindableEvent;
 
 /**
  *
- * 
+ *
  */
 public interface MCConsoleCommandEvent extends BindableEvent {
-	
-	String getCommand();
-	void setCommand(String command);
-	
+
+    String getCommand();
+
+    void setCommand(String command);
+
 }

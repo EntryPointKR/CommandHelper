@@ -1,5 +1,3 @@
-
-
 package com.laytonsmith.abstraction.bukkit.blocks;
 
 import com.laytonsmith.abstraction.MCItemStack;
@@ -32,85 +30,85 @@ import java.util.Collection;
 
 /**
  *
- * 
+ *
  */
 public class BukkitMCBlock extends BukkitMCMetadatable implements MCBlock {
 
     Block b;
 
-    public BukkitMCBlock(Block b){
-		super(b);
+    public BukkitMCBlock(Block b) {
+        super(b);
         this.b = b;
     }
-    
-	@Override
-    public int getTypeId(){
-        if(b == null){
+
+    @Override
+    public int getTypeId() {
+        if (b == null) {
             return 0;
         }
         return b.getTypeId();
     }
-    
-	@Override
-    public byte getData(){
-        return b.getData();
-    }
 
-	@Override
+    @Override
     public void setTypeId(int idata) {
         b.setTypeId(idata);
     }
 
-	@Override
+    @Override
+    public byte getData() {
+        return b.getData();
+    }
+
+    @Override
     public void setData(byte imeta) {
         b.setData(imeta);
     }
 
-	@Override
-	public void setTypeAndData(int type, byte data, boolean physics) {
-		b.setTypeIdAndData(type, data, physics);
-	}
+    @Override
+    public void setTypeAndData(int type, byte data, boolean physics) {
+        b.setTypeIdAndData(type, data, physics);
+    }
 
-	@Override
-	public double getTemperature() {
-		return b.getTemperature();
-	}
+    @Override
+    public double getTemperature() {
+        return b.getTemperature();
+    }
 
-	@Override
+    @Override
     public MCBlockState getState() {
-        if(b.getState() == null){
+        if (b.getState() == null) {
             return null;
         }
-		if(b.getState() instanceof CreatureSpawner){
-			return new BukkitMCCreatureSpawner((CreatureSpawner)b.getState());
-		}
+        if (b.getState() instanceof CreatureSpawner) {
+            return new BukkitMCCreatureSpawner((CreatureSpawner) b.getState());
+        }
         return new BukkitMCBlockState(b.getState());
     }
 
-	@Override
+    @Override
     public MCMaterial getType() {
-        if(b.getType() == null){
+        if (b.getType() == null) {
             return null;
         }
         return new BukkitMCMaterial(b.getType());
     }
 
-	@Override
+    @Override
     public MCWorld getWorld() {
         return new BukkitMCWorld(b.getWorld());
     }
 
-	@Override
+    @Override
     public int getX() {
         return b.getX();
     }
 
-	@Override
+    @Override
     public int getY() {
         return b.getY();
     }
 
-	@Override
+    @Override
     public int getZ() {
         return b.getZ();
     }
@@ -119,122 +117,122 @@ public class BukkitMCBlock extends BukkitMCMetadatable implements MCBlock {
         return b;
     }
 
-	@Override
+    @Override
     public MCSign getSign() {
-        return new BukkitMCSign((Sign)b.getState());
+        return new BukkitMCSign((Sign) b.getState());
     }
 
-	@Override
+    @Override
     public boolean isSign() {
         return (b.getType() == Material.SIGN || b.getType() == Material.SIGN_POST || b.getType() == Material.WALL_SIGN);
     }
-	
-	@Override
-	public MCCommandBlock getCommandBlock() {
-		return new BukkitMCCommandBlock((CommandBlock)b.getState());
-	}
-	
-	@Override
-	public boolean isCommandBlock() {
-		return Command.class.isAssignableFrom(b.getType().getData());
-	}
 
-	@Override
-	public MCDispenser getDispenser() {
-		return new BukkitMCDispenser((Dispenser)b.getState());
-	}
+    @Override
+    public MCCommandBlock getCommandBlock() {
+        return new BukkitMCCommandBlock((CommandBlock) b.getState());
+    }
 
-	@Override
-	public boolean isDispenser() {
-		return(b.getType() == Material.DISPENSER);
-	}
+    @Override
+    public boolean isCommandBlock() {
+        return Command.class.isAssignableFrom(b.getType().getData());
+    }
 
-	@Override
+    @Override
+    public MCDispenser getDispenser() {
+        return new BukkitMCDispenser((Dispenser) b.getState());
+    }
+
+    @Override
+    public boolean isDispenser() {
+        return (b.getType() == Material.DISPENSER);
+    }
+
+    @Override
     public boolean isNull() {
         return b == null;
     }
 
-	@Override
+    @Override
     public Collection<MCItemStack> getDrops() {
         Collection<MCItemStack> collection = new ArrayList<MCItemStack>();
-        for(ItemStack is : b.getDrops()){
+        for (ItemStack is : b.getDrops()) {
             collection.add(new BukkitMCItemStack(is));
         }
         return collection;
     }
-	
-	@Override
-	public Collection<MCItemStack> getDrops(MCItemStack tool) {
-		Collection<MCItemStack> collection = new ArrayList<MCItemStack>();
-		for(ItemStack is : b.getDrops(((BukkitMCItemStack) tool).asItemStack())){
-			collection.add(new BukkitMCItemStack(is));
-		}
-		return collection;
-	}
 
-	@Override
-	public String toString() {
-		return b.toString();
-	}
+    @Override
+    public Collection<MCItemStack> getDrops(MCItemStack tool) {
+        Collection<MCItemStack> collection = new ArrayList<MCItemStack>();
+        for (ItemStack is : b.getDrops(((BukkitMCItemStack) tool).asItemStack())) {
+            collection.add(new BukkitMCItemStack(is));
+        }
+        return collection;
+    }
 
-	@Override
-	public boolean isSolid() {
-		return b.getType().isSolid();
-	}
+    @Override
+    public String toString() {
+        return b.toString();
+    }
 
-	@Override
-	public boolean isFlammable() {
-		return b.getType().isFlammable();
-	}
+    @Override
+    public boolean isSolid() {
+        return b.getType().isSolid();
+    }
 
-	@Override
-	public boolean isTransparent() {
-		return b.getType().isTransparent();
-	}
+    @Override
+    public boolean isFlammable() {
+        return b.getType().isFlammable();
+    }
 
-	@Override
-	public boolean isOccluding() {
-		return b.getType().isOccluding();
-	}
+    @Override
+    public boolean isTransparent() {
+        return b.getType().isTransparent();
+    }
 
-	@Override
-	public boolean isBurnable() {
-		return b.getType().isBurnable();
-	}
+    @Override
+    public boolean isOccluding() {
+        return b.getType().isOccluding();
+    }
 
-	@Override
-	public MCLocation getLocation() {
-		return new BukkitMCLocation(b.getLocation());
-	}
+    @Override
+    public boolean isBurnable() {
+        return b.getType().isBurnable();
+    }
 
-	@Override
-	public int getLightLevel() {
-		return b.getLightLevel();
-	}
+    @Override
+    public MCLocation getLocation() {
+        return new BukkitMCLocation(b.getLocation());
+    }
 
-	@Override
-	public int getBlockPower() {
-		// this is not useful
-		return b.getBlockPower();
-	}
-	
-	@Override
-	public boolean isBlockPowered() {
-		return b.isBlockPowered();
-	}
-	
-	@Override
-	public boolean isBlockIndirectlyPowered() {
-		return b.isBlockIndirectlyPowered();
-	}
+    @Override
+    public int getLightLevel() {
+        return b.getLightLevel();
+    }
 
-	@Override
-	public MCBlock getRelative(MCBlockFace face) {
-		return new BukkitMCBlock(b.getRelative(face.getModX(), face.getModY(), face.getModZ()));
-	}
+    @Override
+    public int getBlockPower() {
+        // this is not useful
+        return b.getBlockPower();
+    }
 
-	@Override
-	public MCBlockFace getFace(MCBlock block) {
-		return BukkitMCBlockFace.getConvertor().getAbstractedEnum(b.getFace(((BukkitMCBlock)block).b));
-	}
+    @Override
+    public boolean isBlockPowered() {
+        return b.isBlockPowered();
+    }
+
+    @Override
+    public boolean isBlockIndirectlyPowered() {
+        return b.isBlockIndirectlyPowered();
+    }
+
+    @Override
+    public MCBlock getRelative(MCBlockFace face) {
+        return new BukkitMCBlock(b.getRelative(face.getModX(), face.getModY(), face.getModZ()));
+    }
+
+    @Override
+    public MCBlockFace getFace(MCBlock block) {
+        return BukkitMCBlockFace.getConvertor().getAbstractedEnum(b.getFace(((BukkitMCBlock) block).b));
+    }
 }

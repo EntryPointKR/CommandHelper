@@ -1,7 +1,5 @@
 package com.laytonsmith.core.functions;
 
-import static org.junit.Assert.assertEquals;
-
 import com.laytonsmith.abstraction.MCPlayer;
 import com.laytonsmith.abstraction.MCServer;
 import com.laytonsmith.abstraction.enums.MCVersion;
@@ -15,9 +13,11 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+import static org.junit.Assert.assertEquals;
+
 /**
  *
- * 
+ *
  */
 
 public class MinecraftTest {
@@ -37,19 +37,19 @@ public class MinecraftTest {
     }
 
     @Before
-    public void setUp() throws Exception {        
+    public void setUp() throws Exception {
         fakePlayer = StaticTest.GetOnlinePlayer();
         fakeServer = StaticTest.GetFakeServer();
-		env = Static.GenerateStandaloneEnvironment();
+        env = Static.GenerateStandaloneEnvironment();
         env.getEnv(CommandHelperEnvironment.class).SetPlayer(fakePlayer);
     }
 
     @After
     public void tearDown() {
     }
-    
+
     @Test
-    public void testIsTameable() throws ConfigCompileException{
+    public void testIsTameable() throws ConfigCompileException {
         //Y U NO COOPERATE, TEST FRAMEWORK?
 //        MCWorld fakeWorld = mock(MCWorld.class);
 //        MCLocation fakeLocation = mock(MCLocation.class);
@@ -68,7 +68,7 @@ public class MinecraftTest {
 //        
 //        SRun("is_tameable(spawn_mob('ocelot')[0])", fakePlayer);
 //        verify(fakePlayer).sendMessage("true");
-        
+
     }
 
     @Test

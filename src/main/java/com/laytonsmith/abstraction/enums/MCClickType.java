@@ -3,12 +3,11 @@ package com.laytonsmith.abstraction.enums;
 import com.laytonsmith.annotations.MEnum;
 
 /**
- * 
  * @author Riking
  */
 @MEnum("ClickType")
 public enum MCClickType {
-	/**
+    /**
      * The left (or primary) mouse button.
      */
     LEFT,
@@ -65,6 +64,5 @@ public enum MCClickType {
      * <p>
      * Any ClickType.UNKNOWN is called on a best-effort basis.
      */
-    UNKNOWN,
-    ;
+    UNKNOWN,;
 }

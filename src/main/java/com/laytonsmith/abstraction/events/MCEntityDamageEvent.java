@@ -5,7 +5,6 @@ import com.laytonsmith.abstraction.enums.MCDamageCause;
 import com.laytonsmith.core.events.BindableEvent;
 
 /**
- *
  * @author EntityReborn
  */
 public interface MCEntityDamageEvent extends BindableEvent {
@@ -14,9 +13,7 @@ public interface MCEntityDamageEvent extends BindableEvent {
 
     public MCEntity getEntity();
 
-    public double getFinalDamage();
+    public int getDamage();
 
-    public double getDamage();
-
-    public void setDamage(double damage);
+    public void setDamage(int damage);
 }

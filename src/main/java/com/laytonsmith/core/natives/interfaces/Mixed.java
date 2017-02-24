@@ -1,5 +1,3 @@
-
-
 package com.laytonsmith.core.natives.interfaces;
 
 import com.laytonsmith.annotations.typeof;
@@ -14,7 +12,7 @@ import com.laytonsmith.core.constructs.Target;
 public interface Mixed extends Cloneable, SimpleDocumentation {
     public String val();
 
-	public void setTarget(Target target);
+    public void setTarget(Target target);
 
-	public Mixed clone() throws CloneNotSupportedException;
+    public Mixed clone() throws CloneNotSupportedException;
 }

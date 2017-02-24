@@ -4,27 +4,42 @@ import com.laytonsmith.abstraction.enums.MCGameMode;
 
 /**
  *
- * 
+ *
  */
-public interface MCHumanEntity extends MCInventoryHolder, MCLivingEntity, MCAnimalTamer{
-	public void closeInventory();
-	public MCGameMode getGameMode();
-	public MCItemStack getItemInHand();
-	public MCItemStack getItemOnCursor();
-	@Override
-	public String getName();
-	public int getSleepTicks();
-	public boolean isBlocking();
-	public boolean isSleeping();
-	public MCInventoryView openEnchanting(MCLocation location, boolean force);
-	public MCInventoryView openInventory(MCInventory inventory);
-	public MCInventoryView getOpenInventory();
-	public MCInventory getEnderChest();
-	public MCInventoryView openWorkbench(MCLocation loc, boolean force);
-	//public MCInventoryView	openWorkbench(MCLocation location, boolean force);
-	void	setGameMode(MCGameMode mode);
-	void	setItemInHand(MCItemStack item);
-	void	setItemOnCursor(MCItemStack item);
-	
-	//public boolean setWindowProperty(MCInventoryView.Property prop, int value);
+public interface MCHumanEntity extends MCInventoryHolder, MCLivingEntity, MCAnimalTamer {
+    public void closeInventory();
+
+    public MCGameMode getGameMode();
+
+    //public MCInventoryView	openWorkbench(MCLocation location, boolean force);
+    void setGameMode(MCGameMode mode);
+
+    public MCItemStack getItemInHand();
+
+    void setItemInHand(MCItemStack item);
+
+    public MCItemStack getItemOnCursor();
+
+    void setItemOnCursor(MCItemStack item);
+
+    @Override
+    public String getName();
+
+    public int getSleepTicks();
+
+    public boolean isBlocking();
+
+    public boolean isSleeping();
+
+    public MCInventoryView openEnchanting(MCLocation location, boolean force);
+
+    public MCInventoryView openInventory(MCInventory inventory);
+
+    public MCInventoryView getOpenInventory();
+
+    public MCInventory getEnderChest();
+
+    public MCInventoryView openWorkbench(MCLocation loc, boolean force);
+
+    //public boolean setWindowProperty(MCInventoryView.Property prop, int value);
 }

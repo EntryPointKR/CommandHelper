@@ -1,5 +1,3 @@
-
-
 package com.laytonsmith.abstraction;
 
 import com.laytonsmith.abstraction.blocks.MCBlock;
@@ -12,7 +10,6 @@ import com.laytonsmith.abstraction.enums.MCEntityType;
 import com.laytonsmith.abstraction.enums.MCGameRule;
 import com.laytonsmith.abstraction.enums.MCMobs;
 import com.laytonsmith.abstraction.enums.MCSound;
-import com.laytonsmith.abstraction.enums.MCSoundCategory;
 import com.laytonsmith.abstraction.enums.MCTreeType;
 import com.laytonsmith.abstraction.enums.MCWorldEnvironment;
 import com.laytonsmith.abstraction.enums.MCWorldType;
@@ -26,84 +23,107 @@ import java.util.List;
  *
  */
 public interface MCWorld extends MCMetadatable {
-	public List<MCPlayer> getPlayers();
-	public List<MCEntity> getEntities();
+    public List<MCPlayer> getPlayers();
+
+    public List<MCEntity> getEntities();
+
     public List<MCLivingEntity> getLivingEntities();
 
     public String getName();
-	public long getSeed();
-	public MCWorldEnvironment getEnvironment();
-	public String getGenerator();
-	public MCWorldType getWorldType();
 
-	int getSeaLevel();
-	int getMaxHeight();
+    public long getSeed();
 
-	public MCDifficulty getDifficulty();
-	public void setDifficulty(MCDifficulty difficulty);
-	public boolean getPVP();
-	public void setPVP(boolean pvp);
-	public String[] getGameRules();
-	public String getGameRuleValue(String gameRule);
-	public boolean setGameRuleValue(MCGameRule gameRule, String value);
-	public MCWorldBorder getWorldBorder();
+    public MCWorldEnvironment getEnvironment();
+
+    public String getGenerator();
+
+    public MCWorldType getWorldType();
+
+    int getSeaLevel();
+
+    int getMaxHeight();
+
+    public MCDifficulty getDifficulty();
+
+    public void setDifficulty(MCDifficulty difficulty);
+
+    public boolean getPVP();
+
+    public void setPVP(boolean pvp);
+
+    public String[] getGameRules();
+
+    public String getGameRuleValue(String gameRule);
+
+    public boolean setGameRuleValue(MCGameRule gameRule, String value);
 
     public MCBlock getBlockAt(int x, int y, int z);
-	public MCChunk getChunkAt(int x, int z);
-	public MCChunk getChunkAt(MCBlock b);
-	public MCChunk getChunkAt(MCLocation l);
-	public MCChunk[] getLoadedChunks();
 
-	public boolean regenerateChunk(int x, int y);
+    public MCChunk getChunkAt(int x, int z);
+
+    public MCChunk getChunkAt(MCBlock b);
+
+    public MCChunk getChunkAt(MCLocation l);
+
+    public MCChunk[] getLoadedChunks();
+
+    public boolean regenerateChunk(int x, int y);
 
     public MCEntity spawn(MCLocation l, Class mobType);
 
-	public MCEntity spawn(MCLocation l, MCEntityType entType);
+    public MCEntity spawn(MCLocation l, MCEntityType entType);
 
-	public MCEntity spawn(MCLocation l, MCEntityType.MCVanillaEntityType entityType);
+    public MCEntity spawn(MCLocation l, MCEntityType.MCVanillaEntityType entityType);
 
-	public boolean generateTree(MCLocation l, MCTreeType treeType);
+    public boolean generateTree(MCLocation l, MCTreeType treeType);
 
-	public void playEffect(MCLocation l, MCEffect mCEffect, int data, int radius);
+    public void playEffect(MCLocation l, MCEffect mCEffect, int data, int radius);
 
-	public void playSound(MCLocation l, MCSound sound, float volume, float pitch);
-	public void playSound(MCLocation l, String sound, float volume, float pitch);
-	public void playSound(MCLocation l, MCSound sound, MCSoundCategory category, float volume, float pitch);
-	public void playSound(MCLocation l, String sound, MCSoundCategory category, float volume, float pitch);
+    public void playSound(MCLocation l, MCSound sound, float volume, float pitch);
+
+    public void playSound(MCLocation l, String sound, float volume, float pitch);
 
     public MCItem dropItemNaturally(MCLocation l, MCItemStack is);
 
     public MCItem dropItem(MCLocation l, MCItemStack is);
 
-	public MCLightningStrike strikeLightning(MCLocation GetLocation);
+    public MCLightningStrike strikeLightning(MCLocation GetLocation);
 
-	public MCLightningStrike strikeLightningEffect(MCLocation GetLocation);
+    public MCLightningStrike strikeLightningEffect(MCLocation GetLocation);
 
     public void setStorm(boolean b);
-	public void setThundering(boolean b);
-	public void setWeatherDuration(int time);
-	public void setThunderDuration(int time);
-	public boolean isStorming();
-	public boolean isThundering();
+
+    public void setWeatherDuration(int time);
+
+    public void setThunderDuration(int time);
+
+    public boolean isStorming();
+
+    public boolean isThundering();
+
+    public void setThundering(boolean b);
 
     public MCLocation getSpawnLocation();
+
     public void setSpawnLocation(int x, int y, int z);
 
     public void refreshChunk(int x, int z);
-	public void loadChunk(int x, int z);
- 	public void unloadChunk(int x, int z);
 
-    public void setTime(long time);
+    public void loadChunk(int x, int z);
+
+    public void unloadChunk(int x, int z);
 
     public long getTime();
 
+    public void setTime(long time);
+
     public CArray spawnMob(MCMobs name, String subClass, int qty, MCLocation location, Target t);
 
-	public MCFallingBlock spawnFallingBlock(MCLocation loc, int type, byte data);
+    public MCFallingBlock spawnFallingBlock(MCLocation loc, int type, byte data);
 
-	public MCFirework launchFirework(MCLocation l, int strength, List<MCFireworkEffect> effects);
+    public MCFirework launchFirework(MCLocation l, int strength, List<MCFireworkEffect> effects);
 
-	public MCBiomeType getBiome(int x, int z);
+    public MCBiomeType getBiome(int x, int z);
 
     public void setBiome(int x, int z, MCBiomeType type);
 
@@ -111,11 +131,12 @@ public interface MCWorld extends MCMetadatable {
 
     public void explosion(double x, double y, double z, float size, boolean safe);
 
-	/**
-	 * This method performs some check on the world to ensure it exists.
-	 * @return
-	 */
-	public boolean exists();
+    /**
+     * This method performs some check on the world to ensure it exists.
+     *
+     * @return
+     */
+    public boolean exists();
 
-	public void save();
+    public void save();
 }

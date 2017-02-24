@@ -6,12 +6,19 @@ import com.laytonsmith.abstraction.MCTravelAgent;
 import com.laytonsmith.core.events.BindableEvent;
 
 public interface MCEntityPortalEvent extends BindableEvent {
-	MCEntity getEntity();
-	void setTo(MCLocation newloc);
-	MCLocation getFrom();
-	MCLocation getTo();
-	void setCancelled(boolean state);
-	boolean isCancelled();
-	void useTravelAgent(boolean useTravelAgent);
-	MCTravelAgent getPortalTravelAgent();
+    MCEntity getEntity();
+
+    MCLocation getFrom();
+
+    MCLocation getTo();
+
+    void setTo(MCLocation newloc);
+
+    boolean isCancelled();
+
+    void setCancelled(boolean state);
+
+    void useTravelAgent(boolean useTravelAgent);
+
+    MCTravelAgent getPortalTravelAgent();
 }

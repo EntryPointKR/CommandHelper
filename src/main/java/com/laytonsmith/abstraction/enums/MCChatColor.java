@@ -1,6 +1,7 @@
 package com.laytonsmith.abstraction.enums;
 
 import com.laytonsmith.annotations.MEnum;
+
 import java.util.HashMap;
 import java.util.Map;
 
@@ -74,58 +75,57 @@ public enum MCChatColor {
      * Represents white
      */
     WHITE(0xF),
-    
+
     //Styles
     /**
      * Represents the random style
      */
     RANDOM('k'),
-    
+
     /**
      * Represents the bold style
      */
     BOLD('l'),
-    
+
     /**
      * Represents the strikethrough style
      */
     STRIKETHROUGH('m'),
-    
+
     /**
      * Represents the underline style
      */
     UNDERLINE('n'),
-    
+
     /**
      * Represents the italic style
      */
     ITALIC('o'),
-    
+
     /**
      * Represents the plain white style
      */
     PLAIN_WHITE('r');
 
-    private final char code;
     private final static Map<Character, MCChatColor> charColors = new HashMap<Character, MCChatColor>();
 
-    private MCChatColor(char code){
+    static {
+        for (MCChatColor color : MCChatColor.values()) {
+            charColors.put(color.getChar(), color);
+        }
+    }
+
+    private final char code;
+
+    private MCChatColor(char code) {
         this.code = code;
     }
+
     private MCChatColor(int code) {
         this.code = Integer.toHexString(code).toLowerCase().charAt(0);
     }
 
-    public char getChar(){
-        return code;
-    }
-
-    @Override
-    public String toString() {
-        return String.format("\u00A7%s", code);
-    }
-
-    public static MCChatColor getByChar(char code){
+    public static MCChatColor getByChar(char code) {
         return charColors.get(code);
     }
 
@@ -143,9 +143,12 @@ public enum MCChatColor {
         return input.replaceAll("(?i)\u00A7[0-9A-Fklmnor]", "");
     }
 
-    static {
-        for (MCChatColor color : MCChatColor.values()) {
-            charColors.put(color.getChar(), color);
-        }
+    public char getChar() {
+        return code;
+    }
+
+    @Override
+    public String toString() {
+        return String.format("\u00A7%s", code);
     }
 }

@@ -1,5 +1,3 @@
-
-
 package com.laytonsmith.core.functions;
 
 import com.laytonsmith.PureUtilities.Common.FileUtil;
@@ -10,16 +8,18 @@ import com.laytonsmith.core.Static;
 import com.laytonsmith.core.environments.CommandHelperEnvironment;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.testing.StaticTest;
-import static com.laytonsmith.testing.StaticTest.RunCommand;
-import static com.laytonsmith.testing.StaticTest.SRun;
-import java.io.File;
-import java.io.IOException;
 import org.junit.After;
 import org.junit.AfterClass;
-import static org.junit.Assert.assertEquals;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
+
+import java.io.File;
+import java.io.IOException;
+
+import static com.laytonsmith.testing.StaticTest.RunCommand;
+import static com.laytonsmith.testing.StaticTest.SRun;
+import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -34,9 +34,9 @@ public class DataHandlingTest {
     MCPlayer fakePlayer;
     com.laytonsmith.core.environments.Environment env;
 
-    public DataHandlingTest() throws Exception{
-		StaticTest.InstallFakeServerFrontend();
-		env = Static.GenerateStandaloneEnvironment();
+    public DataHandlingTest() throws Exception {
+        StaticTest.InstallFakeServerFrontend();
+        env = Static.GenerateStandaloneEnvironment();
     }
 
     @BeforeClass
@@ -71,14 +71,14 @@ public class DataHandlingTest {
         verify(fakePlayer).sendMessage("{0, 1, 2, 3, 4}");
     }
 
-    @Test(expected = ConfigRuntimeException.class, timeout=10000)
+    @Test(expected = ConfigRuntimeException.class, timeout = 10000)
     public void testFor3() throws Exception {
         String script =
                 "   assign(@array, array())"
-                + " for('nope', lt(@i, 5), inc(@i),\n"
-                + "     array_push(@array, @i)\n"
-                + " )\n"
-                + " msg(@array)\n";
+                        + " for('nope', lt(@i, 5), inc(@i),\n"
+                        + "     array_push(@array, @i)\n"
+                        + " )\n"
+                        + " msg(@array)\n";
         MethodScriptCompiler.execute(MethodScriptCompiler.compile(MethodScriptCompiler.lex(script, null, true)), env, null, null);
 
     }
@@ -131,46 +131,46 @@ public class DataHandlingTest {
     }
 
     @Test(timeout = 10000)
-    public void testForeachWithArraySlice() throws Exception{
+    public void testForeachWithArraySlice() throws Exception {
         SRun("foreach(1..2, @i, msg(@i))", fakePlayer);
         verify(fakePlayer).sendMessage("1");
         verify(fakePlayer).sendMessage("2");
     }
 
-	@Test(timeout = 10000)
-	public void testForeachWithKeys1() throws Exception{
-		SRun("@array = array(1: 'one', 2: 'two') @string = '' foreach(@array, @key, @value, @string .= (@key.':'.@value.';')) msg(@string)", fakePlayer);
-		verify(fakePlayer).sendMessage("1:one;2:two;");
-	}
+    @Test(timeout = 10000)
+    public void testForeachWithKeys1() throws Exception {
+        SRun("@array = array(1: 'one', 2: 'two') @string = '' foreach(@array, @key, @value, @string .= (@key.':'.@value.';')) msg(@string)", fakePlayer);
+        verify(fakePlayer).sendMessage("1:one;2:two;");
+    }
 
-	@Test(timeout = 10000)
-	public void testForeachWithKeys2() throws Exception{
-		SRun("@array = array('one': 1, 'two': 2) @string = '' foreach(@array, @key, @value, @string .= (@key.':'.@value.';')) msg(@string)", fakePlayer);
-		verify(fakePlayer).sendMessage("one:1;two:2;");
-	}
+    @Test(timeout = 10000)
+    public void testForeachWithKeys2() throws Exception {
+        SRun("@array = array('one': 1, 'two': 2) @string = '' foreach(@array, @key, @value, @string .= (@key.':'.@value.';')) msg(@string)", fakePlayer);
+        verify(fakePlayer).sendMessage("one:1;two:2;");
+    }
 
-	@Test(timeout = 10000)
-	public void testForeachWithKeys3() throws Exception{
-		SRun("@array = array('one': 1, 'two': 2)\nforeach(@array, @key, @value){\n\tmsg(@key.':'.@value)\n}", fakePlayer);
-		verify(fakePlayer).sendMessage("one:1");
-		verify(fakePlayer).sendMessage("two:2");
-	}
+    @Test(timeout = 10000)
+    public void testForeachWithKeys3() throws Exception {
+        SRun("@array = array('one': 1, 'two': 2)\nforeach(@array, @key, @value){\n\tmsg(@key.':'.@value)\n}", fakePlayer);
+        verify(fakePlayer).sendMessage("one:1");
+        verify(fakePlayer).sendMessage("two:2");
+    }
 
-	@Test
-	public void testForelse() throws Exception{
-		SRun("forelse(assign(@i, 0), @i < 0, @i++, msg('fail'), msg('pass'))", fakePlayer);
-		verify(fakePlayer).sendMessage("pass");
-		verify(fakePlayer, times(0)).sendMessage("fail");
-	}
+    @Test
+    public void testForelse() throws Exception {
+        SRun("forelse(assign(@i, 0), @i < 0, @i++, msg('fail'), msg('pass'))", fakePlayer);
+        verify(fakePlayer).sendMessage("pass");
+        verify(fakePlayer, times(0)).sendMessage("fail");
+    }
 
-	@Test
-	public void testForeachelse() throws Exception{
-		SRun("foreachelse(array(), @val, msg('fail'), msg('pass'))", fakePlayer);
-		SRun("foreachelse(array(1), @val, msg('pass'), msg('fail'))", fakePlayer);
-		SRun("foreachelse(1..2, @val, msg('pass'), msg('fail'))", fakePlayer);
-		verify(fakePlayer, times(4)).sendMessage("pass");
-		verify(fakePlayer, times(0)).sendMessage("fail");
-	}
+    @Test
+    public void testForeachelse() throws Exception {
+        SRun("foreachelse(array(), @val, msg('fail'), msg('pass'))", fakePlayer);
+        SRun("foreachelse(array(1), @val, msg('pass'), msg('fail'))", fakePlayer);
+        SRun("foreachelse(1..2, @val, msg('pass'), msg('fail'))", fakePlayer);
+        verify(fakePlayer, times(4)).sendMessage("pass");
+        verify(fakePlayer, times(0)).sendMessage("fail");
+    }
 
     @Test(timeout = 10000)
     public void testCallProcIsProc() throws Exception {
@@ -282,10 +282,10 @@ public class DataHandlingTest {
         verify(fakePlayer).sendMessage("hello");
         //delete the test file
         test.delete();
-		test.deleteOnExit();
+        test.deleteOnExit();
     }
 
-	// This feature has been deprecated, and now removed.
+    // This feature has been deprecated, and now removed.
 //    @Test(timeout = 10000)
 //    public void testExportImportIVariable() throws Exception {
 //        when(fakePlayer.isOp()).thenReturn(true);
@@ -306,7 +306,7 @@ public class DataHandlingTest {
     }
 
     @Test
-    public void testExportImportStringValue2() throws Exception{
+    public void testExportImportStringValue2() throws Exception {
         when(fakePlayer.isOp()).thenReturn(Boolean.TRUE);
         SRun("assign(@test, array(1, 2, 3))"
                 + "export('myarray', @test)"
@@ -316,43 +316,43 @@ public class DataHandlingTest {
     }
 
     @Test
-    public void testExportImportWithProcs1() throws Exception{
+    public void testExportImportWithProcs1() throws Exception {
         SRun("proc(_derping," +
-                "   msg(import('borked'))"+
+                "   msg(import('borked'))" +
                 "   assign(@var, import('borked'))" +
                 "   assign(@var, array('Am', 'I', 'borked?'))" +
                 "   export('borked', @var)" +
                 "   msg(import('borked'))" +
                 ")\n" +
-                "_derping()\n"+
+                "_derping()\n" +
                 "_derping()", fakePlayer);
         verify(fakePlayer).sendMessage("null");
         verify(fakePlayer, times(3)).sendMessage("{Am, I, borked?}");
     }
 
     @Test
-    public void testExportImportWithProcs2() throws Exception{
+    public void testExportImportWithProcs2() throws Exception {
         SRun("assign(@array, array(1, 2))"
                 + "export('myarray', @array)", fakePlayer);
         SRun("proc(_get, return(import('myarray')))"
                 + "msg(_get())", fakePlayer);
         verify(fakePlayer).sendMessage("{1, 2}");
     }
-	
-	@Test
-	public void testExportImportArrayNameSpace() throws Exception{
-		when(fakePlayer.isOp()).thenReturn(Boolean.TRUE);
-		SRun("assign(@key, array('custom', 'key1'))"
-				+ "assign(@value, 'key1Value')"
-				+ "export(@key, @value)"
-				+ "msg(import('custom.key1'))", fakePlayer);
-		verify(fakePlayer).sendMessage("key1Value");
-		SRun("assign(@key, array('custom', 'key2'))"
-				+ "assign(@value, 'key2Value')"
-				+ "export('custom.key2', @value)"
-				+ "msg(import(@key))", fakePlayer);
-		verify(fakePlayer).sendMessage("key2Value");
-	}
+
+    @Test
+    public void testExportImportArrayNameSpace() throws Exception {
+        when(fakePlayer.isOp()).thenReturn(Boolean.TRUE);
+        SRun("assign(@key, array('custom', 'key1'))"
+                + "assign(@value, 'key1Value')"
+                + "export(@key, @value)"
+                + "msg(import('custom.key1'))", fakePlayer);
+        verify(fakePlayer).sendMessage("key1Value");
+        SRun("assign(@key, array('custom', 'key2'))"
+                + "assign(@value, 'key2Value')"
+                + "export('custom.key2', @value)"
+                + "msg(import(@key))", fakePlayer);
+        verify(fakePlayer).sendMessage("key2Value");
+    }
 
     @Test(timeout = 10000)
     public void testIsBoolean() throws Exception {
@@ -371,7 +371,7 @@ public class DataHandlingTest {
     @Test(timeout = 10000)
     public void testIsDouble() throws Exception {
         SRun("msg(is_double(5)) msg(is_double('5.0')) msg(is_double('5'.0)) msg(is_double(5.'0'))"
-				+ "msg(is_double(5.0)) msg(is_double(5 . 0))", fakePlayer);
+                + "msg(is_double(5.0)) msg(is_double(5 . 0))", fakePlayer);
         verify(fakePlayer, times(4)).sendMessage("false");
         verify(fakePlayer, times(2)).sendMessage("true");
     }
@@ -386,9 +386,9 @@ public class DataHandlingTest {
     @Test(timeout = 10000)
     public void testIsNumeric() throws Exception {
         SRun("msg(is_numeric('s')) "
-		+ " msg(is_numeric(null))"
-		+ " msg(is_numeric(true))"
-		+ " msg(is_numeric(2))"
+                + " msg(is_numeric(null))"
+                + " msg(is_numeric(true))"
+                + " msg(is_numeric(2))"
                 + " msg(is_numeric(2.0))", fakePlayer);
         verify(fakePlayer, times(1)).sendMessage("false");
         verify(fakePlayer, times(4)).sendMessage("true");
@@ -479,32 +479,32 @@ public class DataHandlingTest {
         verify(fakePlayer).sendMessage("{Hello World}");
     }
 
-    @Test(timeout=10000)
-    public void testWhile() throws Exception{
+    @Test(timeout = 10000)
+    public void testWhile() throws Exception {
         SRun("assign(@i, 2) while(@i > 0, @i-- msg('hi'))", fakePlayer);
         verify(fakePlayer, times(2)).sendMessage("hi");
     }
 
-    @Test(timeout=10000)
-    public void testDoWhile() throws Exception{
+    @Test(timeout = 10000)
+    public void testDoWhile() throws Exception {
         SRun("assign(@i, 2) dowhile(@i-- msg('hi'), @i > 0)", fakePlayer);
         verify(fakePlayer, times(2)).sendMessage("hi");
     }
 
-	@Test
-	public void testToRadix() throws Exception {
-		assertEquals("f", SRun("to_radix(15, 16)", null));
-		assertEquals("1111", SRun("to_radix(15, 2)", null));
-	}
+    @Test
+    public void testToRadix() throws Exception {
+        assertEquals("f", SRun("to_radix(15, 16)", null));
+        assertEquals("1111", SRun("to_radix(15, 2)", null));
+    }
 
-	@Test
-	public void testParseInt() throws Exception {
-		assertEquals("15", SRun("parse_int('F', 16)", null));
-		assertEquals("15", SRun("parse_int('1111', 2)", null));
-	}
+    @Test
+    public void testParseInt() throws Exception {
+        assertEquals("15", SRun("parse_int('F', 16)", null));
+        assertEquals("15", SRun("parse_int('1111', 2)", null));
+    }
 
-	@Test
-	public void testClosureReturnsFromExecute() throws Exception {
-		assertEquals("3", SRun("execute(closure(return(3)))", fakePlayer));
-	}
+    @Test
+    public void testClosureReturnsFromExecute() throws Exception {
+        assertEquals("3", SRun("execute(closure(return(3)))", fakePlayer));
+    }
 }

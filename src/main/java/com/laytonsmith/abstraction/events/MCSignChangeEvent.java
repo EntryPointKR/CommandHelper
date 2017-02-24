@@ -7,7 +7,6 @@ import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.events.BindableEvent;
 
 /**
- *
  * @author EntityReborn
  */
 public interface MCSignChangeEvent extends BindableEvent {
@@ -20,7 +19,7 @@ public interface MCSignChangeEvent extends BindableEvent {
 
     public void setLine(int index, String text);
 
-    public void setLines(String[] lines);
-
     public CArray getLines();
+
+    public void setLines(String[] lines);
 }

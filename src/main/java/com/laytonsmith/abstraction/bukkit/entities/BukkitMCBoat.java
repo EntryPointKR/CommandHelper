@@ -6,52 +6,52 @@ import org.bukkit.entity.Entity;
 import org.bukkit.entity.Vehicle;
 
 public class BukkitMCBoat extends BukkitMCVehicle
-		implements MCBoat {
+        implements MCBoat {
 
-	Boat b;
+    Boat b;
 
-	public BukkitMCBoat(Entity e) {
-		super((Vehicle) e);
-		this.b = (Boat) e;
-	}
+    public BukkitMCBoat(Entity e) {
+        super((Vehicle) e);
+        this.b = (Boat) e;
+    }
 
-	@Override
-	public double getMaxSpeed() {
-		return b.getMaxSpeed();
-	}
+    @Override
+    public double getMaxSpeed() {
+        return b.getMaxSpeed();
+    }
 
-	@Override
-	public void setMaxSpeed(double speed) {
-		b.setMaxSpeed(speed);
-	}
+    @Override
+    public void setMaxSpeed(double speed) {
+        b.setMaxSpeed(speed);
+    }
 
-	@Override
-	public double getOccupiedDeclaration() {
-		return b.getOccupiedDeceleration();
-	}
+    @Override
+    public double getOccupiedDeclaration() {
+        return b.getOccupiedDeceleration();
+    }
 
-	@Override
-	public void setOccupiedDeclaration(double rate) {
-		b.setOccupiedDeceleration(rate);
-	}
+    @Override
+    public void setOccupiedDeclaration(double rate) {
+        b.setOccupiedDeceleration(rate);
+    }
 
-	@Override
-	public double getUnoccupiedDeclaration() {
-		return b.getOccupiedDeceleration();
-	}
+    @Override
+    public double getUnoccupiedDeclaration() {
+        return b.getOccupiedDeceleration();
+    }
 
-	@Override
-	public void setUnoccupiedDeclaration(double rate) {
-		b.setUnoccupiedDeceleration(rate);
-	}
+    @Override
+    public void setUnoccupiedDeclaration(double rate) {
+        b.setUnoccupiedDeceleration(rate);
+    }
 
-	@Override
-	public boolean getWorkOnLand() {
-		return b.getWorkOnLand();
-	}
+    @Override
+    public boolean getWorkOnLand() {
+        return b.getWorkOnLand();
+    }
 
-	@Override
-	public void setWorkOnLand(boolean workOnLand) {
-		b.setWorkOnLand(workOnLand);
-	}
+    @Override
+    public void setWorkOnLand(boolean workOnLand) {
+        b.setWorkOnLand(workOnLand);
+    }
 }

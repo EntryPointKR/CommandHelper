@@ -1,4 +1,4 @@
-name: CommandHelper
+name: CommandHelper-Backport
 main: com.laytonsmith.commandhelper.CommandHelperPlugin
 version: "${project.version}"
 commands:

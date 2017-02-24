@@ -5,14 +5,20 @@ import com.laytonsmith.abstraction.enums.MCTeleportCause;
 
 /**
  *
- * 
+ *
  */
 public interface MCPlayerTeleportEvent extends MCPlayerEvent {
-	public MCTeleportCause getCause();
+    public MCTeleportCause getCause();
+
+    public MCLocation getFrom();
+
     public void setFrom(MCLocation oldloc);
+
+    public MCLocation getTo();
+
     public void setTo(MCLocation newloc);
-	public MCLocation getFrom();
-	public MCLocation getTo();
-	public void setCancelled(boolean state);
-	public boolean isCancelled();
+
+    public boolean isCancelled();
+
+    public void setCancelled(boolean state);
 }

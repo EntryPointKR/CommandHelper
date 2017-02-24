@@ -1,6 +1,7 @@
 package com.laytonsmith.PureUtilities;
 
 import com.laytonsmith.PureUtilities.Common.StreamUtils;
+
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -20,42 +21,7 @@ import java.util.logging.Logger;
  */
 public final class TermColors {
 
-    private TermColors() {
-    }
-
-    public enum SYS {
-
-	WINDOWS,
-	UNIX
-    }
     public static final SYS SYSTEM;
-
-    static {
-	String os = System.getProperty("os.name");
-	if (os.contains("Windows")) {
-	    SYSTEM = SYS.WINDOWS;
-	} else {
-	    SYSTEM = SYS.UNIX;
-	}
-    }
-
-    public static void cls() {
-	if (SYSTEM.equals(SYS.WINDOWS)) {
-	    //Fuck you windows.
-	    for (int i = 0; i < 50; i++) {
-		StreamUtils.GetSystemOut().println();
-	    }
-	} else {
-	    StreamUtils.GetSystemOut().print("\u001b[2J");
-	    StreamUtils.GetSystemOut().flush();
-	}
-    }
-
-    @Retention(RetentionPolicy.RUNTIME)
-    @Target(ElementType.FIELD)
-    private @interface color {
-    }
-
     /*
      * Standard foreground colors
      */
@@ -75,7 +41,6 @@ public final class TermColors {
     public static String BLACK = color(Color.BLACK);
     @color
     public static String WHITE = color(Color.WHITE);
-
     /*
      * Bright foreground colors
      */
@@ -95,7 +60,6 @@ public final class TermColors {
     public static String BRIGHT_BLACK = color(Color.BLACK, true, true, true);
     @color
     public static String BRIGHT_WHITE = color(Color.WHITE, true, true, true);
-
     /*
      * Standard background colors
      */
@@ -115,7 +79,6 @@ public final class TermColors {
     public static String BG_BLACK = color(Color.BLACK, false, false, false);
     @color
     public static String BG_WHITE = color(Color.WHITE, false, false, false);
-
     /*
      * Bright background colors
      */
@@ -135,12 +98,10 @@ public final class TermColors {
     public static String BG_BRIGHT_BLACK = color(Color.BLACK, true, false, false);
     @color
     public static String BG_BRIGHT_WHITE = color(Color.WHITE, true, false, false);
-
     @color
     public static String BLINKON = special("blinkon");
     @color
     public static String BLINKOFF = special("blinkoff");
-
     @color
     public static String BOLD = special("bold");
     @color
@@ -149,60 +110,94 @@ public final class TermColors {
     public static String UNDERLINE = special("underline");
     @color
     public static String ITALIC = special("italic");
-
     @color
     public static String RESET = special("reset");
-
     private static Map<String, String> defaults = new HashMap<String, String>();
     private static List<Field> fields = null;
+    private static Scanner scanner;
+
+    static {
+        String os = System.getProperty("os.name");
+        if (os.contains("Windows")) {
+            SYSTEM = SYS.WINDOWS;
+        } else {
+            SYSTEM = SYS.UNIX;
+        }
+    }
+
+    /**
+     * THIS BLOCK MUST REMAIN AT THE BOTTOM
+     */
+    static {
+        if (SYSTEM == SYS.WINDOWS) {
+            DisableColors();
+        } else {
+            EnableColors();
+        }
+    }
+
+    private TermColors() {
+    }
+
+    public static void cls() {
+        if (SYSTEM.equals(SYS.WINDOWS)) {
+            //Fuck you windows.
+            for (int i = 0; i < 50; i++) {
+                StreamUtils.GetSystemOut().println();
+            }
+        } else {
+            StreamUtils.GetSystemOut().print("\u001b[2J");
+            StreamUtils.GetSystemOut().flush();
+        }
+    }
 
     private static List<Field> fields() {
-	if (fields == null) {
-	    fields = new ArrayList<Field>();
-	    for (Field f : TermColors.class.getFields()) {
-		if (f.getAnnotation(color.class) != null) {
-		    fields.add(f);
-		    try {
-			defaults.put(f.getName(), (String) f.get(null));
-		    } catch (IllegalArgumentException ex) {
-			Logger.getLogger(TermColors.class.getName()).log(Level.SEVERE, null, ex);
-		    } catch (IllegalAccessException ex) {
-			Logger.getLogger(TermColors.class.getName()).log(Level.SEVERE, null, ex);
-		    }
-		}
-	    }
-	}
-	return fields;
+        if (fields == null) {
+            fields = new ArrayList<Field>();
+            for (Field f : TermColors.class.getFields()) {
+                if (f.getAnnotation(color.class) != null) {
+                    fields.add(f);
+                    try {
+                        defaults.put(f.getName(), (String) f.get(null));
+                    } catch (IllegalArgumentException ex) {
+                        Logger.getLogger(TermColors.class.getName()).log(Level.SEVERE, null, ex);
+                    } catch (IllegalAccessException ex) {
+                        Logger.getLogger(TermColors.class.getName()).log(Level.SEVERE, null, ex);
+                    }
+                }
+            }
+        }
+        return fields;
     }
 
     /**
      * Enables colors.
      */
     public static void EnableColors() {
-	for (Field f : fields()) {
-	    try {
-		f.set(null, defaults.get(f.getName()));
-	    } catch (IllegalArgumentException ex) {
-		Logger.getLogger(TermColors.class.getName()).log(Level.SEVERE, null, ex);
-	    } catch (IllegalAccessException ex) {
-		Logger.getLogger(TermColors.class.getName()).log(Level.SEVERE, null, ex);
-	    }
-	}
+        for (Field f : fields()) {
+            try {
+                f.set(null, defaults.get(f.getName()));
+            } catch (IllegalArgumentException ex) {
+                Logger.getLogger(TermColors.class.getName()).log(Level.SEVERE, null, ex);
+            } catch (IllegalAccessException ex) {
+                Logger.getLogger(TermColors.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        }
     }
 
     /**
      * Disables colors.
      */
     public static void DisableColors() {
-	for (Field f : fields()) {
-	    try {
-		f.set(null, "");
-	    } catch (IllegalArgumentException ex) {
-		Logger.getLogger(TermColors.class.getName()).log(Level.SEVERE, null, ex);
-	    } catch (IllegalAccessException ex) {
-		Logger.getLogger(TermColors.class.getName()).log(Level.SEVERE, null, ex);
-	    }
-	}
+        for (Field f : fields()) {
+            try {
+                f.set(null, "");
+            } catch (IllegalArgumentException ex) {
+                Logger.getLogger(TermColors.class.getName()).log(Level.SEVERE, null, ex);
+            } catch (IllegalAccessException ex) {
+                Logger.getLogger(TermColors.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        }
     }
 
     /**
@@ -211,35 +206,35 @@ public final class TermColors {
      * @return
      */
     public static boolean ColorsDisabled() {
-	return RED == null;
+        return RED == null;
     }
 
     private static String special(String type) {
 
-	// On windows, these effects (except for reset) get printed as a changed background color.
-	// This is consistent with how broadcast() messages are printed to the console.
-	switch (type) {
-	    case "blinkon":
-		return "\033[5m";
-	    case "blinkoff":
-		return "\033[25m";
-	    case "bold":
-		return "\033[1m";
-	    case "strike":
-		return "\033[9m";
-	    case "underline":
-		return "\033[4m";
-	    case "italic":
-		return "\033[3m";
-	    case "reset":
-		return "\033[m";
-	    default:
-		return "";
-	}
+        // On windows, these effects (except for reset) get printed as a changed background color.
+        // This is consistent with how broadcast() messages are printed to the console.
+        switch (type) {
+            case "blinkon":
+                return "\033[5m";
+            case "blinkoff":
+                return "\033[25m";
+            case "bold":
+                return "\033[1m";
+            case "strike":
+                return "\033[9m";
+            case "underline":
+                return "\033[4m";
+            case "italic":
+                return "\033[3m";
+            case "reset":
+                return "\033[m";
+            default:
+                return "";
+        }
     }
 
     public static String reset() {
-	return RESET;
+        return RESET;
     }
 
     /**
@@ -249,80 +244,78 @@ public final class TermColors {
      * @return
      */
     public static String color(Color c) {
-	return color(c, false, true, true);
+        return color(c, false, true, true);
     }
 
     /**
      * This is not the preferred method, however, if you must, you can use this function to get the specified colors,
      * given an awt Color. Not all colors are supported, and bad colors will just return white.
      *
-     * @param c The color to set.
+     * @param c            The color to set.
      * @param bright
-     * @param foreground True to set the color of the foreground, false to set the color of the background.
+     * @param foreground   True to set the color of the foreground, false to set the color of the background.
      * @param resetCurrent Resets ANSI modifiers before this ANSI color.
      * @return
      */
     private static String color(Color c, boolean bright, boolean foreground, boolean resetCurrent) {
 
-	int color = 37;
-	if (c.equals(Color.RED)) {
-	    color = 31;
-	} else if (c.equals(Color.GREEN)) {
-	    color = 32;
-	} else if (c.equals(Color.BLUE)) {
-	    color = 34;
-	} else if (c.equals(Color.YELLOW)) {
-	    color = 33;
-	} else if (c.equals(Color.CYAN)) {
-	    color = 36;
-	} else if (c.equals(Color.MAGENTA)) {
-	    color = 35;
-	} else if (c.equals(Color.BLACK)) {
-	    color = 30;
-	} else if (c.equals(Color.WHITE)) {
-	    color = 37;
-	}
-	if (!foreground) {
-	    color += 10;
-	}
-	// ANSI: 0 = reset, 1 = bright_intensity, 22 = normal_intensity.
-	return "\033[" + (resetCurrent ? "0;" : "") + color + ";" + (bright ? "1" : "22") + "m";
+        int color = 37;
+        if (c.equals(Color.RED)) {
+            color = 31;
+        } else if (c.equals(Color.GREEN)) {
+            color = 32;
+        } else if (c.equals(Color.BLUE)) {
+            color = 34;
+        } else if (c.equals(Color.YELLOW)) {
+            color = 33;
+        } else if (c.equals(Color.CYAN)) {
+            color = 36;
+        } else if (c.equals(Color.MAGENTA)) {
+            color = 35;
+        } else if (c.equals(Color.BLACK)) {
+            color = 30;
+        } else if (c.equals(Color.WHITE)) {
+            color = 37;
+        }
+        if (!foreground) {
+            color += 10;
+        }
+        // ANSI: 0 = reset, 1 = bright_intensity, 22 = normal_intensity.
+        return "\033[" + (resetCurrent ? "0;" : "") + color + ";" + (bright ? "1" : "22") + "m";
     }
 
     public static void p(CharSequence c) {
-	StreamUtils.GetSystemOut().print(c);
-	StreamUtils.GetSystemOut().flush();
+        StreamUtils.GetSystemOut().print(c);
+        StreamUtils.GetSystemOut().flush();
     }
 
     public static void pl() {
-	pl("");
+        pl("");
     }
 
     public static String prompt() {
-	if (scanner == null) {
-	    scanner = new Scanner(System.in);
-	}
-	p(">" + MAGENTA);
-	StreamUtils.GetSystemOut().flush();
-	String ret = scanner.nextLine();
-	p(WHITE);
-	return ret;
+        if (scanner == null) {
+            scanner = new Scanner(System.in);
+        }
+        p(">" + MAGENTA);
+        StreamUtils.GetSystemOut().flush();
+        String ret = scanner.nextLine();
+        p(WHITE);
+        return ret;
     }
-
-    private static Scanner scanner;
 
     public static void pl(CharSequence c) {
-	StreamUtils.GetSystemOut().println(c + WHITE);
+        StreamUtils.GetSystemOut().println(c + WHITE);
     }
 
-    /**
-     * THIS BLOCK MUST REMAIN AT THE BOTTOM
-     */
-    static {
-	if (SYSTEM == SYS.WINDOWS) {
-	    DisableColors();
-	} else {
-	    EnableColors();
-	}
+    public enum SYS {
+
+        WINDOWS,
+        UNIX
+    }
+
+    @Retention(RetentionPolicy.RUNTIME)
+    @Target(ElementType.FIELD)
+    private @interface color {
     }
 }

@@ -8,33 +8,34 @@ import org.bukkit.scoreboard.Score;
 
 public class BukkitMCScore implements MCScore {
 
-	Score s;
-	public BukkitMCScore(Score score) {
-		s = score;
-	}
+    Score s;
 
-	@Override
-	public MCObjective getObjective() {
-		return new BukkitMCObjective(s.getObjective());
-	}
+    public BukkitMCScore(Score score) {
+        s = score;
+    }
 
-	@Override
-	public MCOfflinePlayer getPlayer() {
-		return new BukkitMCOfflinePlayer(s.getPlayer());
-	}
+    @Override
+    public MCObjective getObjective() {
+        return new BukkitMCObjective(s.getObjective());
+    }
 
-	@Override
-	public int getScore() {
-		return s.getScore();
-	}
+    @Override
+    public MCOfflinePlayer getPlayer() {
+        return new BukkitMCOfflinePlayer(s.getPlayer());
+    }
 
-	@Override
-	public MCScoreboard getScoreboard() {
-		return new BukkitMCScoreboard(s.getScoreboard());
-	}
+    @Override
+    public int getScore() {
+        return s.getScore();
+    }
 
-	@Override
-	public void setScore(int score) {
-		s.setScore(score);
-	}
+    @Override
+    public void setScore(int score) {
+        s.setScore(score);
+    }
+
+    @Override
+    public MCScoreboard getScoreboard() {
+        return new BukkitMCScoreboard(s.getScoreboard());
+    }
 }

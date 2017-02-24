@@ -1,7 +1,7 @@
-
 package com.laytonsmith.annotations;
 
 import com.laytonsmith.core.events.BindableEvent;
+
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -18,5 +18,5 @@ import java.lang.annotation.Target;
 @Target(ElementType.METHOD)
 @Deprecated // Use @api class MyClass extends AbstractEvent instead!
 public @interface event {
-	
+
 }

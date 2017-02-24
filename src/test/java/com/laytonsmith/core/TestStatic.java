@@ -1,5 +1,3 @@
-
-
 package com.laytonsmith.core;
 
 import com.laytonsmith.core.constructs.CBoolean;
@@ -12,14 +10,15 @@ import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.testing.C;
 import org.junit.AfterClass;
+import org.junit.Before;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.Test;
 
 /**
  *
@@ -27,6 +26,7 @@ import org.junit.Test;
  */
 public class TestStatic {
     Target t = Target.UNKNOWN;
+
     public TestStatic() {
     }
 
@@ -62,10 +62,10 @@ public class TestStatic {
     public void testGetInt() {
         assertEquals(1, Static.getInt(C.Int(1), t));
         assertEquals(1, Static.getInt(C.String("1"), t));
-        try{
+        try {
             Static.getInt(C.Double(1.0), t);
             fail("Should not have been able to parse 1.0 as an int");
-        } catch(ConfigRuntimeException e){ /* Test Passed */ }
+        } catch (ConfigRuntimeException e) { /* Test Passed */ }
     }
 
     @Test
@@ -100,7 +100,7 @@ public class TestStatic {
         assertNotNull(Static.getLogger());
     }
 
-    @Test(expected=NotInitializedYetException.class)
+    @Test(expected = NotInitializedYetException.class)
     public void testGetVersion() {
         Static.getVersion();
     }

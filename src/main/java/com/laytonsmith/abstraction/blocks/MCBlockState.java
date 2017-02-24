@@ -6,17 +6,17 @@ import com.laytonsmith.abstraction.MCMetadatable;
 
 /**
  *
- * 
+ *
  */
 public interface MCBlockState extends MCMetadatable {
 
-	public MCMaterialData getData();
+    public MCMaterialData getData();
 
-	public int getTypeId();
+    public int getTypeId();
 
-	public MCBlock getBlock();
+    public MCBlock getBlock();
 
-	public MCLocation getLocation();
+    public MCLocation getLocation();
 
-	public void update();
+    public void update();
 }

@@ -3,55 +3,61 @@ package com.laytonsmith.core;
 import com.laytonsmith.core.compiler.OptimizationUtilities;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.testing.StaticTest;
-import static org.junit.Assert.assertEquals;
 import org.junit.BeforeClass;
 import org.junit.Test;
+
+import static org.junit.Assert.assertEquals;
 
 /**
  * This class tests optimizations by looking at the tree after optimization occurs to see
  * if it matches expectation.
- *
  */
 public class OptimizationTest {
 
-	@BeforeClass
-	public static void setUpClass(){
-		StaticTest.InstallFakeServerFrontend();
-	}
+    @BeforeClass
+    public static void setUpClass() {
+        StaticTest.InstallFakeServerFrontend();
+    }
 
     public String optimize(String script) throws Exception {
         return OptimizationUtilities.optimize(script, null);
     }
 
-    @Test public void testTestFramework() throws Exception{
+    @Test
+    public void testTestFramework() throws Exception {
         //This just tests to see that the basic framework works. This shouldn't optimize.
         assertEquals("msg('this is a string','so is this')", optimize("msg(\n 'this is a string',\nso is this\n)"));
         assertEquals("msg('\\'quoted\\'')", optimize("msg( '\\'quoted\\'' )"));
     }
 
-    @Test public void testIfBasic() throws Exception{
+    @Test
+    public void testIfBasic() throws Exception {
         assertEquals("msg('hi')", optimize("if(true){ msg('hi') } else { msg('fail') }"));
     }
 
-    @Test public void testIfWithBraces() throws Exception{
+    @Test
+    public void testIfWithBraces() throws Exception {
         assertEquals("if(dyn(),msg('hi'),msg('hi'))", optimize("if(dyn()){ msg('hi') } else { msg('hi') }"));
     }
 
-	@Test public void testIfElse() throws Exception {
-		assertEquals("ifelse(dyn(1),msg(''),dyn(2),msg(''),msg(''))", optimize("if(dyn(1)){ msg('') } else if(dyn(2)){ msg('') } else { msg('') }"));
-	}
+    @Test
+    public void testIfElse() throws Exception {
+        assertEquals("ifelse(dyn(1),msg(''),dyn(2),msg(''),msg(''))", optimize("if(dyn(1)){ msg('') } else if(dyn(2)){ msg('') } else { msg('') }"));
+    }
 
-	@Test public void testIfElseWithDie() throws Exception {
-		assertEquals("ifelse(is_null($pl),die(''),not(ponline(player($pl))),die(concat($pl,'')))",
-				optimize("if(is_null($pl)) {\ndie('') } else if(!ponline(player($pl))){ die($pl.'') }"));
-	}
+    @Test
+    public void testIfElseWithDie() throws Exception {
+        assertEquals("ifelse(is_null($pl),die(''),not(ponline(player($pl))),die(concat($pl,'')))",
+                optimize("if(is_null($pl)) {\ndie('') } else if(!ponline(player($pl))){ die($pl.'') }"));
+    }
 
-	// Need to add this back too
+    // Need to add this back too
 //	@Test public void testNestedIfsWithRemoval() throws Exception {
 //		assertEquals("p()", optimize("ifelse(1, if(0, msg('')), msg(''))"));
 //	}
 
-    @Test public void testMultipleLinesInBraces() throws Exception{
+    @Test
+    public void testMultipleLinesInBraces() throws Exception {
         assertEquals("if(dyn(false),msg('nope'),sconcat(msg('hi'),msg('hi')))", optimize("if(dyn(false)){\n"
                 + "msg('nope')\n"
                 + "} else {\n"
@@ -60,16 +66,17 @@ public class OptimizationTest {
                 + "}"));
     }
 
-	//TODO: These tests are not intended to be corrected in master, so I'm removing them for now
+    //TODO: These tests are not intended to be corrected in master, so I'm removing them for now
 //    @Test public void testProcOptimization1() throws Exception{
 //        //The proc stays there, but the call to it should be consolidated
 //        assertEquals("sconcat(proc('_add',@a,@b,return(add(@a,@b))),4)", optimize("proc(_add, @a, @b, return(@a + @b)) _add(2, 2)"));
 //    }
 
-	@Test public void testProcOptimizationRecursion() throws Exception{
-		assertEquals("sconcat(proc('_loop',@a,if(gt(@a,0),_loop(subtract(@a,1)),return(@a))),_loop(2))",
-				optimize("proc(_loop, @a, if(@a > 0, _loop(@a - 1), return(@a))) _loop(2)"));
-	}
+    @Test
+    public void testProcOptimizationRecursion() throws Exception {
+        assertEquals("sconcat(proc('_loop',@a,if(gt(@a,0),_loop(subtract(@a,1)),return(@a))),_loop(2))",
+                optimize("proc(_loop, @a, if(@a > 0, _loop(@a - 1), return(@a))) _loop(2)"));
+    }
 
 //    @Test(expected=ConfigCompileException.class)
 //    public void testProcOptimization2() throws Exception{
@@ -77,7 +84,7 @@ public class OptimizationTest {
 //    }
 
     @Test
-    public void testProcOptimization3() throws Exception{
+    public void testProcOptimization3() throws Exception {
         //Rather, lack of optimization
         assertEquals("sconcat(proc('_nope',msg('Hi')),_nope())", optimize("proc(_nope, msg('Hi')) _nope()"));
     }
@@ -89,202 +96,229 @@ public class OptimizationTest {
 //                optimize("proc(_outer, proc(_inner, @a, return(@a)) _inner('blah')) _inner('huh')"));
 //    }
 
-    @Test public void testProcReturn() throws Exception{
+    @Test
+    public void testProcReturn() throws Exception {
         assertEquals("sconcat(proc('_proc',return(array(1))),array_get(_proc(),0))",
                 optimize("proc(_proc, return(array(1))) _proc()[0]"));
     }
 
-	@Test public void testUnreachableCode() throws Exception{
-		assertEquals("sconcat(assign(@a,0),if(@a,string(die()),sconcat(msg('2'),msg('3'))))", optimize("assign(@a, 0) if(@a){ die() msg('1') } else { msg('2') msg('3') }"));
-		assertEquals("string(die())", optimize("if(true){ die() msg('1') } else { msg('2') msg('3') }"));
-	}
+    @Test
+    public void testUnreachableCode() throws Exception {
+        assertEquals("sconcat(assign(@a,0),if(@a,string(die()),sconcat(msg('2'),msg('3'))))", optimize("assign(@a, 0) if(@a){ die() msg('1') } else { msg('2') msg('3') }"));
+        assertEquals("string(die())", optimize("if(true){ die() msg('1') } else { msg('2') msg('3') }"));
+    }
 
-	@Test public void testUnreachableCodeWithBranchTypeFunction() throws Exception{
-		assertEquals("if(@var,die(),msg(''))", optimize("if(@var){ die() } else { msg('') }"));
-	}
+    @Test
+    public void testUnreachableCodeWithBranchTypeFunction() throws Exception {
+        assertEquals("if(@var,die(),msg(''))", optimize("if(@var){ die() } else { msg('') }"));
+    }
 
-	@Test public void testRegSplitOptimization1() throws Exception{
-		assertEquals("split('pattern',dyn('subject'))", optimize("reg_split('pattern', dyn('subject'))"));
-	}
+    @Test
+    public void testRegSplitOptimization1() throws Exception {
+        assertEquals("split('pattern',dyn('subject'))", optimize("reg_split('pattern', dyn('subject'))"));
+    }
 
-	@Test public void testRegSplitOptimization2() throws Exception{
-		assertEquals("split('.',dyn('subject'))", optimize("reg_split(reg_escape('.'), dyn('subject'))"));
-	}
+    @Test
+    public void testRegSplitOptimization2() throws Exception {
+        assertEquals("split('.',dyn('subject'))", optimize("reg_split(reg_escape('.'), dyn('subject'))"));
+    }
 
-	@Test public void testRegReplaceOptimization1() throws Exception{
-		assertEquals("replace('this is a thing','thing',dyn('hi'))", optimize("reg_replace('thing', dyn('hi'), 'this is a thing')"));
-	}
+    @Test
+    public void testRegReplaceOptimization1() throws Exception {
+        assertEquals("replace('this is a thing','thing',dyn('hi'))", optimize("reg_replace('thing', dyn('hi'), 'this is a thing')"));
+    }
 
-	@Test public void testTrivialAssignmentWithEqualsSymbol() throws Exception{
-		assertEquals("assign(@a,1)", optimize("@a = 1"));
-	}
+    @Test
+    public void testTrivialAssignmentWithEqualsSymbol() throws Exception {
+        assertEquals("assign(@a,1)", optimize("@a = 1"));
+    }
 
-	@Test public void testAssignWithEqualsSymbol() throws Exception {
-		assertEquals("sconcat(assign(@var,'ab'),'c')", optimize("@var = 'a'.'b' 'c'"));
-	}
+    @Test
+    public void testAssignWithEqualsSymbol() throws Exception {
+        assertEquals("sconcat(assign(@var,'ab'),'c')", optimize("@var = 'a'.'b' 'c'"));
+    }
 
-	@Test public void testAssignWithOperators() throws Exception{
-		assertEquals("assign(@one,add(@one,1))", optimize("@one += 1"));
-		assertEquals("assign(@one,subtract(@one,1))", optimize("@one -= 1"));
-		assertEquals("assign(@one,multiply(@one,1))", optimize("@one *= 1"));
-		assertEquals("assign(@one,divide(@one,1))", optimize("@one /= 1"));
-		assertEquals("assign(@one,concat(@one,1))", optimize("@one .= 1"));
-	}
+    @Test
+    public void testAssignWithOperators() throws Exception {
+        assertEquals("assign(@one,add(@one,1))", optimize("@one += 1"));
+        assertEquals("assign(@one,subtract(@one,1))", optimize("@one -= 1"));
+        assertEquals("assign(@one,multiply(@one,1))", optimize("@one *= 1"));
+        assertEquals("assign(@one,divide(@one,1))", optimize("@one /= 1"));
+        assertEquals("assign(@one,concat(@one,1))", optimize("@one .= 1"));
+    }
 
-	@Test public void testMultiAssign() throws Exception{
-		assertEquals("assign(@one,assign(@two,''))", optimize("@one = @two = ''"));
-		assertEquals("sconcat(assign(@one,assign(@two,'')),'blah')", optimize("@one = @two = '' 'blah'"));
-	}
+    @Test
+    public void testMultiAssign() throws Exception {
+        assertEquals("assign(@one,assign(@two,''))", optimize("@one = @two = ''"));
+        assertEquals("sconcat(assign(@one,assign(@two,'')),'blah')", optimize("@one = @two = '' 'blah'"));
+    }
 
-	@Test public void testAssignmentMixedWithAddition1() throws Exception{
-		assertEquals("add(1,assign(@a,1))", optimize("1 + @a = 1"));
-	}
+    @Test
+    public void testAssignmentMixedWithAddition1() throws Exception {
+        assertEquals("add(1,assign(@a,1))", optimize("1 + @a = 1"));
+    }
 
-	@Test public void testAssignmentMixedWithAddition2() throws Exception{
-		assertEquals("add(1,assign(@a,add(@b,2)))", optimize("1 + @a = @b + 2"));
-	}
+    @Test
+    public void testAssignmentMixedWithAddition2() throws Exception {
+        assertEquals("add(1,assign(@a,add(@b,2)))", optimize("1 + @a = @b + 2"));
+    }
 
-	@Test public void testAssignmentMixedWithAddition3() throws Exception{
-		assertEquals("add(1,assign(@a,add(@b,@c,2)))", optimize("1 + @a = @b + @c + 2"));
-	}
+    @Test
+    public void testAssignmentMixedWithAddition3() throws Exception {
+        assertEquals("add(1,assign(@a,add(@b,@c,2)))", optimize("1 + @a = @b + @c + 2"));
+    }
 
-	@Test public void testAssignmentMixedWithAddition4() throws Exception{
-		assertEquals("add(1,assign(@a,add(@a,@b,@c,2)))", optimize("1 + @a += @b + @c + 2"));
-	}
+    @Test
+    public void testAssignmentMixedWithAddition4() throws Exception {
+        assertEquals("add(1,assign(@a,add(@a,@b,@c,2)))", optimize("1 + @a += @b + @c + 2"));
+    }
 
-	@Test public void testAssignmentMixedWithAddition5() throws Exception{
-		assertEquals("add(1,assign(@_,assign(@a,add(@a,@b,@c,2))))", optimize("1 + @_ = @a += @b + @c + 2"));
-	}
+    @Test
+    public void testAssignmentMixedWithAddition5() throws Exception {
+        assertEquals("add(1,assign(@_,assign(@a,add(@a,@b,@c,2))))", optimize("1 + @_ = @a += @b + @c + 2"));
+    }
 
-	@Test public void testAssignmentMixedWithAddition6() throws Exception{
-		assertEquals("sconcat(add(1,assign(@_,assign(@a,add(@a,@b,@c,2)))),'blah')", optimize("1 + @_ = @a += @b + @c + 2 'blah'"));
-	}
+    @Test
+    public void testAssignmentMixedWithAddition6() throws Exception {
+        assertEquals("sconcat(add(1,assign(@_,assign(@a,add(@a,@b,@c,2)))),'blah')", optimize("1 + @_ = @a += @b + @c + 2 'blah'"));
+    }
 
-	@Test public void testInnerIfAnded() throws Exception{
-		assertEquals("if(and(@a,@b),msg(''))", optimize("if(@a){ if(@b){ msg('') } }"));
-	}
+    @Test
+    public void testInnerIfAnded() throws Exception {
+        assertEquals("if(and(@a,@b),msg(''))", optimize("if(@a){ if(@b){ msg('') } }"));
+    }
 
-	@Test public void testInnerIfWithOtherStatements1() throws Exception{
-		assertEquals("if(@a,if(@b,msg(''),msg('')))", optimize("if(@a){ if(@b){ msg('') } else { msg('') } }"));
-	}
+    @Test
+    public void testInnerIfWithOtherStatements1() throws Exception {
+        assertEquals("if(@a,if(@b,msg(''),msg('')))", optimize("if(@a){ if(@b){ msg('') } else { msg('') } }"));
+    }
 
-	@Test public void testInnerIfWithOtherStatements2() throws Exception{
-		assertEquals("if(@a,sconcat(if(@b,msg('')),msg('')))", optimize("if(@a){ if(@b){ msg('') } msg('') }"));
-	}
+    @Test
+    public void testInnerIfWithOtherStatements2() throws Exception {
+        assertEquals("if(@a,sconcat(if(@b,msg('')),msg('')))", optimize("if(@a){ if(@b){ msg('') } msg('') }"));
+    }
 
-	@Test public void testInnerIfWithExistingAnd() throws Exception{
-		assertEquals("if(and(@a,@b,@c),msg(''))", optimize("if(@a && @b){ if(@c){ msg('') } }"));
-	}
+    @Test
+    public void testInnerIfWithExistingAnd() throws Exception {
+        assertEquals("if(and(@a,@b,@c),msg(''))", optimize("if(@a && @b){ if(@c){ msg('') } }"));
+    }
 
-	@Test public void testForWithPostfix() throws Exception{
-		assertEquals("for(assign(@i,0),lt(@i,5),inc(@i),msg(''))", optimize("for(@i = 0, @i < 5, @i++, msg(''))"));
-		assertEquals("for(assign(@i,0),lt(@i,5),dec(@i),msg(''))", optimize("for(@i = 0, @i < 5, @i--, msg(''))"));
-	}
+    @Test
+    public void testForWithPostfix() throws Exception {
+        assertEquals("for(assign(@i,0),lt(@i,5),inc(@i),msg(''))", optimize("for(@i = 0, @i < 5, @i++, msg(''))"));
+        assertEquals("for(assign(@i,0),lt(@i,5),dec(@i),msg(''))", optimize("for(@i = 0, @i < 5, @i--, msg(''))"));
+    }
 
-	// Need to add this back too
+    // Need to add this back too
 //	@Test public void testIfelseWithInnerDynamic() throws Exception{
 //		assertEquals("if(dyn(),msg('success'))", optimize("ifelse(1, if(dyn(), msg('success')),msg('fail'))"));
 //	}
 
-	@Test public void testAndOrPullsUp() throws Exception{
-		assertEquals("or(dyn(),dyn(),dyn())", optimize("dyn() || dyn() || dyn()"));
-		assertEquals("and(dyn(),dyn(),dyn())", optimize("dyn() && dyn() && dyn()"));
-	}
+    @Test
+    public void testAndOrPullsUp() throws Exception {
+        assertEquals("or(dyn(),dyn(),dyn())", optimize("dyn() || dyn() || dyn()"));
+        assertEquals("and(dyn(),dyn(),dyn())", optimize("dyn() && dyn() && dyn()"));
+    }
 
-	@Test public void testAndRemovesTrues() throws Exception{
-		assertEquals("and(dyn(),dyn())", optimize("and(true, dyn(), true, dyn())"));
-		assertEquals("true", optimize("and(true, true, true)"));
-	}
+    @Test
+    public void testAndRemovesTrues() throws Exception {
+        assertEquals("and(dyn(),dyn())", optimize("and(true, dyn(), true, dyn())"));
+        assertEquals("true", optimize("and(true, true, true)"));
+    }
 
-	@Test public void testOrRemovesFalses() throws Exception{
-		assertEquals("or(dyn(),dyn())", optimize("or(false, dyn(), false, dyn())"));
-		assertEquals("false", optimize("or(false, false, false)"));
-	}
+    @Test
+    public void testOrRemovesFalses() throws Exception {
+        assertEquals("or(dyn(),dyn())", optimize("or(false, dyn(), false, dyn())"));
+        assertEquals("false", optimize("or(false, false, false)"));
+    }
 
-	// This will be a nice optimization to add back soon
+    // This will be a nice optimization to add back soon
 //	@Test public void testNoOperationIf() throws Exception {
 //		assertEquals("g(dyn(1))", optimize("if(dyn(1)){ }"));
 //	}
 
-	//This won't work as easily, because the reg_count has already been evaluated
+    //This won't work as easily, because the reg_count has already been evaluated
 //	@Test public void testNoSideEffectsRemovesUnusedBranches1() throws Exception {
 //		assertEquals("msg('hi')", optimize("if(reg_count('hi', 'hi')){ } msg('hi')"));
 //	}
 
-	// This is actually invalid, because the dyn has side effects (or rather, isn't registered to not
-	// have them). ALL nodes in the condition tree must have no side effects for this to be valid. For
-	// now, this isn't implemented anyways.
+    // This is actually invalid, because the dyn has side effects (or rather, isn't registered to not
+    // have them). ALL nodes in the condition tree must have no side effects for this to be valid. For
+    // now, this isn't implemented anyways.
 //	@Test public void testNoSideEffectsRemovesUnusedBranches2() throws Exception {
 //		assertEquals("msg('hi')", optimize("if(reg_count('hi', dyn('hi'))){ } msg('hi')"));
 //	}
 
-	//tests the new switch syntax
-	@Test public void testSwitch1() throws Exception {
-		assertEquals("switch(@a,array(1,2),msg('1, 2'),"
-				+ "array(3..4),sconcat(msg('3'),msg('4')),"
-				+ "array(false),msg('false'),"
-				+ "array(0.07),msg(0.07),"
-				+ "msg('default'))",
-				optimize("switch(@a){"
-						+ "	case 1:"
-						+ "	case 2:"
-						+ "		msg('1, 2');"
-						+ "	case 3..4:"
-						+ "		msg('3');"
-						+ "		msg('4');"
-						+ "	case false:"
-						+ "		msg('false');"
-						+ "	case 00.07:"
-						+ "		msg(00.07);"
-						+ "	case 'ignored':"
-						+ "	default:"
-						+ "		msg('default');"
-						+ "}"));
-	}
-	@Test(expected = ConfigCompileException.class)
-	public void testSwitch2() throws Exception {
-		optimize("switch(@a){"
-				+ "	case 1:"
-				+ "	case 0..2:"
-				+ "		msg('invalid');"
-				+ "}");
-	}
+    //tests the new switch syntax
+    @Test
+    public void testSwitch1() throws Exception {
+        assertEquals("switch(@a,array(1,2),msg('1, 2'),"
+                        + "array(3..4),sconcat(msg('3'),msg('4')),"
+                        + "array(false),msg('false'),"
+                        + "array(0.07),msg(0.07),"
+                        + "msg('default'))",
+                optimize("switch(@a){"
+                        + "	case 1:"
+                        + "	case 2:"
+                        + "		msg('1, 2');"
+                        + "	case 3..4:"
+                        + "		msg('3');"
+                        + "		msg('4');"
+                        + "	case false:"
+                        + "		msg('false');"
+                        + "	case 00.07:"
+                        + "		msg(00.07);"
+                        + "	case 'ignored':"
+                        + "	default:"
+                        + "		msg('default');"
+                        + "}"));
+    }
 
-	@Test
-	public void testEmptySwitch() throws Exception {
-		assertEquals("switch(dyn(1))", optimize("switch(dyn(1)){ case 1: case 2: default: }"));
-	}
+    @Test(expected = ConfigCompileException.class)
+    public void testSwitch2() throws Exception {
+        optimize("switch(@a){"
+                + "	case 1:"
+                + "	case 0..2:"
+                + "		msg('invalid');"
+                + "}");
+    }
 
-	// Tests "-" signs in front of values to negate them.
-	@Test public void testMinusWithoutValueInFront() throws Exception{
-		assertEquals("assign(@b,neg(@a))", optimize("@b = -@a"));
-		assertEquals("assign(@b,neg(@a))", optimize("@b = - @a"));
+    @Test
+    public void testEmptySwitch() throws Exception {
+        assertEquals("switch(dyn(1))", optimize("switch(dyn(1)){ case 1: case 2: default: }"));
+    }
 
-		assertEquals("assign(@b,array(neg(@a)))", optimize("@b = array(-@a)"));
-		assertEquals("assign(@b,array(neg(@a)))", optimize("@b = array(- @a)"));
+    // Tests "-" signs in front of values to negate them.
+    @Test
+    public void testMinusWithoutValueInFront() throws Exception {
+        assertEquals("assign(@b,neg(@a))", optimize("@b = -@a"));
+        assertEquals("assign(@b,neg(@a))", optimize("@b = - @a"));
 
-		assertEquals("assign(@b,neg(array_get(@a,1)))", optimize("@b = -@a[1]"));
-		assertEquals("assign(@b,neg(array_get(@a,1)))", optimize("@b = - @a[1]"));
+        assertEquals("assign(@b,array(neg(@a)))", optimize("@b = array(-@a)"));
+        assertEquals("assign(@b,array(neg(@a)))", optimize("@b = array(- @a)"));
 
-		assertEquals("assign(@b,neg(dec(@a)))", optimize("@b = -dec(@a)"));
-		assertEquals("assign(@b,neg(dec(@a)))", optimize("@b = - dec(@a)"));
+        assertEquals("assign(@b,neg(array_get(@a,1)))", optimize("@b = -@a[1]"));
+        assertEquals("assign(@b,neg(array_get(@a,1)))", optimize("@b = - @a[1]"));
 
-		assertEquals("assign(@b,neg(array_get(array(1,2,3),1)))", optimize("@b = -array(1,2,3)[1]"));
+        assertEquals("assign(@b,neg(dec(@a)))", optimize("@b = -dec(@a)"));
+        assertEquals("assign(@b,neg(dec(@a)))", optimize("@b = - dec(@a)"));
 
-		assertEquals("assign(@b,neg(array_get(array_get(array_get(array(array(array(2))),0),0),0)))", optimize("@b = -array(array(array(2)))[0][0][0]"));
+        assertEquals("assign(@b,neg(array_get(array(1,2,3),1)))", optimize("@b = -array(1,2,3)[1]"));
 
-		assertEquals("assign(@b,neg(array_get(array_get(array_get(array(array(array(2))),neg(array_get(array(1,0),1))),0),0)))",
-				optimize("@b = -array(array(array(2)))[-array(1,0)[1]][0][0]"));
+        assertEquals("assign(@b,neg(array_get(array_get(array_get(array(array(array(2))),0),0),0)))", optimize("@b = -array(array(array(2)))[0][0][0]"));
 
-		// Test behaviour where the value should not be negated.
-		assertEquals("assign(@c,subtract(@a,@b))", optimize("@c = @a - @b"));
-		assertEquals("assign(@c,subtract(array_get(@a,0),@b))", optimize("@c = @a[0] - @b"));
-		assertEquals("assign(@c,subtract(abs(@a),@b))", optimize("@c = abs(@a) - @b"));
-		assertEquals("assign(@c,subtract(if(@bool,2,3),@b))", optimize("@c = if(@bool) {2} else {3} - @b"));
+        assertEquals("assign(@b,neg(array_get(array_get(array_get(array(array(array(2))),neg(array_get(array(1,0),1))),0),0)))",
+                optimize("@b = -array(array(array(2)))[-array(1,0)[1]][0][0]"));
 
-		assertEquals("assign(@b,subtract(dec(@a),2))", optimize("@b = dec(@a)-2"));
-		assertEquals("assign(@b,subtract(dec(@a),2))", optimize("@b = dec(@a)- 2"));
-	}
+        // Test behaviour where the value should not be negated.
+        assertEquals("assign(@c,subtract(@a,@b))", optimize("@c = @a - @b"));
+        assertEquals("assign(@c,subtract(array_get(@a,0),@b))", optimize("@c = @a[0] - @b"));
+        assertEquals("assign(@c,subtract(abs(@a),@b))", optimize("@c = abs(@a) - @b"));
+        assertEquals("assign(@c,subtract(if(@bool,2,3),@b))", optimize("@c = if(@bool) {2} else {3} - @b"));
+
+        assertEquals("assign(@b,subtract(dec(@a),2))", optimize("@b = dec(@a)-2"));
+        assertEquals("assign(@b,subtract(dec(@a),2))", optimize("@b = dec(@a)- 2"));
+    }
 
     //TODO: This is a bit ambitious for now, put this back at some point, and then make it pass.
 //    @Test public void testAssign() throws Exception{
@@ -310,32 +344,32 @@ public class OptimizationTest {
 //                + "msg(@a)"));
 //    }
 
-	@Test
-	public void testNotinstanceofKeyword() throws Exception {
-		assertEquals("msg(not(instanceof(dyn(2),int)))", optimize("msg(dyn(2) notinstanceof int);"));
-	}
+    @Test
+    public void testNotinstanceofKeyword() throws Exception {
+        assertEquals("msg(not(instanceof(dyn(2),int)))", optimize("msg(dyn(2) notinstanceof int);"));
+    }
 
-	@Test
-	public void testDor() throws Exception {
-	    assertEquals("dor(dyn(''),dyn('a'))", optimize("dyn('') ||| dyn('a')"));
-	    assertEquals("dor(dyn(''),dyn('a'),dyn('b'))", optimize("dyn('') ||| dyn('a') ||| dyn('b')"));
-	}
+    @Test
+    public void testDor() throws Exception {
+        assertEquals("dor(dyn(''),dyn('a'))", optimize("dyn('') ||| dyn('a')"));
+        assertEquals("dor(dyn(''),dyn('a'),dyn('b'))", optimize("dyn('') ||| dyn('a') ||| dyn('b')"));
+    }
 
-	@Test
-	public void testDand() throws Exception {
-	    assertEquals("dand(dyn(''),dyn('a'))", optimize("dyn('') &&& dyn('a')"));
-	    assertEquals("dand(dyn(''),dyn('a'),dyn('b'))", optimize("dyn('') &&& dyn('a') &&& dyn('b')"));
-	}
+    @Test
+    public void testDand() throws Exception {
+        assertEquals("dand(dyn(''),dyn('a'))", optimize("dyn('') &&& dyn('a')"));
+        assertEquals("dand(dyn(''),dyn('a'),dyn('b'))", optimize("dyn('') &&& dyn('a') &&& dyn('b')"));
+    }
 
-	@Test
-	public void testDorOptimization() throws Exception {
-	    assertEquals("'a'", optimize("dor(false, false, 'a')"));
-	}
+    @Test
+    public void testDorOptimization() throws Exception {
+        assertEquals("'a'", optimize("dor(false, false, 'a')"));
+    }
 
-	@Test
-	public void testDandOptimization() throws Exception {
-	    assertEquals("''", optimize("dand(true, true, '')"));
-	}
+    @Test
+    public void testDandOptimization() throws Exception {
+        assertEquals("''", optimize("dand(true, true, '')"));
+    }
 
 
 }

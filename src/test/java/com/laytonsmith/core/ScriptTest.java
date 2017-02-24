@@ -1,5 +1,3 @@
-
-
 package com.laytonsmith.core;
 
 import org.junit.After;
@@ -9,10 +7,10 @@ import org.junit.BeforeClass;
 
 /**
  *
- * 
+ *
  */
 public class ScriptTest {
-    
+
     public ScriptTest() {
     }
 
@@ -23,11 +21,11 @@ public class ScriptTest {
     @AfterClass
     public static void tearDownClass() throws Exception {
     }
-    
+
     @Before
     public void setUp() {
     }
-    
+
     @After
     public void tearDown() {
     }

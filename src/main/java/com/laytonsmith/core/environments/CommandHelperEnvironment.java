@@ -15,23 +15,23 @@ public class CommandHelperEnvironment implements Environment.EnvironmentImpl, Cl
     private String command = null;
 
 
-
-
     /**
      * Given the environment, this function returns the CommandSender in the
      * environment, which can possibly be null.
+     *
      * @param env
      * @return
      */
-    public MCCommandSender GetCommandSender(){
+    public MCCommandSender GetCommandSender() {
         return commandSender;
     }
 
     /**
      * Sets the CommandSender in this environment
+     *
      * @param env
      */
-    public void SetCommandSender(MCCommandSender cs){
+    public void SetCommandSender(MCCommandSender cs) {
         commandSender = cs;
     }
 
@@ -40,12 +40,13 @@ public class CommandHelperEnvironment implements Environment.EnvironmentImpl, Cl
      * environment, which can possibly be null. It is also possible the
      * environment contains a CommandSender object instead, which will
      * cause null to be returned.
+     *
      * @param env
      * @return
      */
-    public MCPlayer GetPlayer(){
-        if(commandSender instanceof MCPlayer){
-            return (MCPlayer)commandSender;
+    public MCPlayer GetPlayer() {
+        if (commandSender instanceof MCPlayer) {
+            return (MCPlayer) commandSender;
         } else {
             return null;
         }
@@ -53,15 +54,16 @@ public class CommandHelperEnvironment implements Environment.EnvironmentImpl, Cl
 
     /**
      * Sets the Player in this environment
+     *
      * @param env
      */
-    public void SetPlayer(MCPlayer p){
+    public void SetPlayer(MCPlayer p) {
         commandSender = p;
     }
 
     @Override
-    public CommandHelperEnvironment clone() throws CloneNotSupportedException{
-        CommandHelperEnvironment clone = (CommandHelperEnvironment)super.clone();
+    public CommandHelperEnvironment clone() throws CloneNotSupportedException {
+        CommandHelperEnvironment clone = (CommandHelperEnvironment) super.clone();
         return clone;
     }
 
@@ -69,19 +71,19 @@ public class CommandHelperEnvironment implements Environment.EnvironmentImpl, Cl
         this.command = command;
     }
 
-    public String GetCommand(){
+    public String GetCommand() {
         return this.command;
     }
 
-	public void SetBlockCommandSender(MCBlockCommandSender bcs) {
-		this.commandSender = bcs;
-	}
+    public void SetBlockCommandSender(MCBlockCommandSender bcs) {
+        this.commandSender = bcs;
+    }
 
-	public MCBlockCommandSender GetBlockCommandSender(){
-		if(this.commandSender instanceof MCBlockCommandSender){
-			return (MCBlockCommandSender)commandSender;
-		} else {
-			return null;
-		}
-	}
+    public MCBlockCommandSender GetBlockCommandSender() {
+        if (this.commandSender instanceof MCBlockCommandSender) {
+            return (MCBlockCommandSender) commandSender;
+        } else {
+            return null;
+        }
+    }
 }

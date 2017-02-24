@@ -1,5 +1,3 @@
-
-
 package com.laytonsmith.core.functions;
 
 import com.laytonsmith.abstraction.MCPlayer;
@@ -7,19 +5,21 @@ import com.laytonsmith.abstraction.MCServer;
 import com.laytonsmith.core.Static;
 import com.laytonsmith.core.environments.CommandHelperEnvironment;
 import com.laytonsmith.testing.StaticTest;
-import static com.laytonsmith.testing.StaticTest.GetFakeServer;
-import static com.laytonsmith.testing.StaticTest.GetOnlinePlayer;
-import static com.laytonsmith.testing.StaticTest.InstallFakeServerFrontend;
-import static com.laytonsmith.testing.StaticTest.SRun;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
+
+import static com.laytonsmith.testing.StaticTest.GetFakeServer;
+import static com.laytonsmith.testing.StaticTest.GetOnlinePlayer;
+import static com.laytonsmith.testing.StaticTest.InstallFakeServerFrontend;
+import static com.laytonsmith.testing.StaticTest.SRun;
 import static org.mockito.Mockito.verify;
 //import org.powermock.core.classloader.annotations.PowerMockIgnore;
 //import org.powermock.core.classloader.annotations.PrepareForTest;
 //import org.powermock.modules.junit4.PowerMockRunner;
+
 /**
  *
  *
@@ -30,11 +30,11 @@ import static org.mockito.Mockito.verify;
 public class EnchantmentsTest {
     MCServer fakeServer;
     MCPlayer fakePlayer;
-	com.laytonsmith.core.environments.Environment env;
+    com.laytonsmith.core.environments.Environment env;
 
     public EnchantmentsTest() throws Exception {
-		InstallFakeServerFrontend();
-		env = Static.GenerateStandaloneEnvironment();
+        InstallFakeServerFrontend();
+        env = Static.GenerateStandaloneEnvironment();
     }
 
     @BeforeClass
@@ -64,7 +64,7 @@ public class EnchantmentsTest {
      * individual enchantments, they aren't implemented here, so everything returns an empty
      * array. However, the test is more for testing array.clone than the enchantments themselves.
      */
-    public void testGetEnchants() throws Exception{
+    public void testGetEnchants() throws Exception {
         SRun("assign(@a, get_enchants(311))\n"
                 + "array_push(@a, 'test')\n"
                 + "assign(@b, get_enchants(311))\n"

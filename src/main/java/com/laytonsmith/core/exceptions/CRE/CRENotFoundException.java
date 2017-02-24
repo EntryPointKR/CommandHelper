@@ -6,25 +6,25 @@ import com.laytonsmith.core.CHVersion;
 import com.laytonsmith.core.constructs.Target;
 
 /**
- * 
+ *
  */
 @typeof("NotFoundException")
 public class CRENotFoundException extends CREException {
-	public CRENotFoundException(String msg, Target t) {
-		super(msg, t);
-	}
+    public CRENotFoundException(String msg, Target t) {
+        super(msg, t);
+    }
 
-	public CRENotFoundException(String msg, Target t, Throwable cause) {
-		super(msg, t, cause);
-	}
+    public CRENotFoundException(String msg, Target t, Throwable cause) {
+        super(msg, t, cause);
+    }
 
-	@Override
-	public String docs() {
-		return "Thrown if data was not found, but expected.";
-	}
+    @Override
+    public String docs() {
+        return "Thrown if data was not found, but expected.";
+    }
 
-	@Override
-	public Version since() {
-		return CHVersion.V3_3_1;
-	}
+    @Override
+    public Version since() {
+        return CHVersion.V3_3_1;
+    }
 }

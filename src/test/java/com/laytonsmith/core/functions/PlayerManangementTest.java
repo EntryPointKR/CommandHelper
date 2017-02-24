@@ -1,5 +1,3 @@
-
-
 package com.laytonsmith.core.functions;
 
 import com.laytonsmith.abstraction.MCCommandSender;
@@ -13,19 +11,21 @@ import com.laytonsmith.abstraction.blocks.MCBlock;
 import com.laytonsmith.abstraction.bukkit.BukkitMCWorld;
 import com.laytonsmith.commandhelper.CommandHelperPlugin;
 import com.laytonsmith.testing.StaticTest;
+import org.junit.After;
+import org.junit.AfterClass;
+import org.junit.Before;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import java.util.HashSet;
+
 import static com.laytonsmith.testing.StaticTest.GetFakeConsoleCommandSender;
 import static com.laytonsmith.testing.StaticTest.GetFakeServer;
 import static com.laytonsmith.testing.StaticTest.GetOp;
 import static com.laytonsmith.testing.StaticTest.GetWorld;
 import static com.laytonsmith.testing.StaticTest.Run;
 import static com.laytonsmith.testing.StaticTest.SRun;
-import java.util.HashSet;
-import org.junit.After;
-import org.junit.AfterClass;
 import static org.junit.Assert.assertEquals;
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.Test;
 import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
@@ -139,8 +139,8 @@ public class PlayerManangementTest {
         when(fakeServer.getPlayer(fakePlayer.getName())).thenReturn(fakePlayer);
         when(fakePlayer.getTargetBlock((HashSet) eq(null), anyInt(), eq(false))).thenReturn(b);
         MCWorld w = mock(MCWorld.class);
-		MCLocation loc = StaticTest.GetFakeLocation(w, 0, 0, 0);
-		when(b.getLocation()).thenReturn(loc);
+        MCLocation loc = StaticTest.GetFakeLocation(w, 0, 0, 0);
+        when(b.getLocation()).thenReturn(loc);
         when(b.getWorld()).thenReturn(w);
         Run("pcursor()", fakePlayer);
         verify(fakePlayer, times(1)).getTargetBlock((HashSet) eq(null), anyInt(), eq(false));
@@ -160,12 +160,12 @@ public class PlayerManangementTest {
     }
 
     @Test
-    public void testPlayerNotProvided() throws Exception{
+    public void testPlayerNotProvided() throws Exception {
         assertEquals("success", SRun("try(pkill(), assign(@success, 'success')) @success", null));
     }
 
     @Test
-    public void testPlayerFromConsole() throws Exception{
+    public void testPlayerFromConsole() throws Exception {
         MCConsoleCommandSender fakeConsole = mock(MCConsoleCommandSender.class);
         when(fakeConsole.getName()).thenReturn("CONSOLE");
         assertEquals("~console", SRun("player()", fakeConsole));

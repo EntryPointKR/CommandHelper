@@ -1,5 +1,3 @@
-
-
 package com.laytonsmith.core.functions;
 
 import com.laytonsmith.abstraction.MCPlayer;
@@ -8,14 +6,15 @@ import com.laytonsmith.commandhelper.CommandHelperPlugin;
 import com.laytonsmith.core.MethodScriptCompiler;
 import com.laytonsmith.core.Static;
 import com.laytonsmith.core.environments.CommandHelperEnvironment;
-import static com.laytonsmith.testing.StaticTest.GetFakeServer;
-import static com.laytonsmith.testing.StaticTest.GetOnlinePlayer;
-import static com.laytonsmith.testing.StaticTest.SRun;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
+
+import static com.laytonsmith.testing.StaticTest.GetFakeServer;
+import static com.laytonsmith.testing.StaticTest.GetOnlinePlayer;
+import static com.laytonsmith.testing.StaticTest.SRun;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -45,7 +44,7 @@ public class MetaTest {
         fakePlayer = GetOnlinePlayer();
         fakeServer = GetFakeServer();
         CommandHelperPlugin.myServer = fakeServer;
-		env = Static.GenerateStandaloneEnvironment();
+        env = Static.GenerateStandaloneEnvironment();
         env.getEnv(CommandHelperEnvironment.class).SetPlayer(fakePlayer);
     }
 
@@ -65,12 +64,14 @@ public class MetaTest {
         verify(fakeServer).dispatchCommand(fakePlayer2, "cmd yay");
     }
 
-    @Test public void testEval() throws Exception{
+    @Test
+    public void testEval() throws Exception {
         SRun("eval('msg(\\'Hello World!\\')')", fakePlayer);
         verify(fakePlayer).sendMessage("Hello World!");
     }
 
-    @Test public void testEval2() throws Exception{
+    @Test
+    public void testEval2() throws Exception {
         SRun("assign(@e, 'msg(\\'Hello World!\\')') eval(@e)", fakePlayer);
         verify(fakePlayer).sendMessage("Hello World!");
     }
@@ -93,4 +94,4 @@ public class MetaTest {
 //        MethodScriptCompiler.execute(MethodScriptCompiler.compile(MethodScriptCompiler.lex(script, null)), fakePlayer, null, null);
 //        assertTrue(bool.get());
 //    }
-    }
+}

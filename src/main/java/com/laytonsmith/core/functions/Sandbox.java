@@ -136,21 +136,44 @@ public class Sandbox {
 //        }
 //    }
 
+    private static String GenerateMooSaying(String text) {
+        String[] saying = text.split("\r\n|\n|\n\r");
+        int longest = 0;
+        for (String s : saying) {
+            longest = java.lang.Math.max(longest, s.length());
+        }
+        String divider = "";
+        for (int i = 0; i < longest + 4; i++) {
+            divider += "-";
+        }
+        String[] lines = new String[saying.length];
+        for (int i = 0; i < saying.length; i++) {
+            int spaces = longest - saying[i].length();
+            String sSpaces = "";
+            for (int j = 0; j < spaces; j++) {
+                sSpaces += " ";
+            }
+            lines[i] = "| " + saying[i] + sSpaces + " |";
+        }
+        return divider + "\n"
+                + StringUtils.Join(lines, "\n") + "\n"
+                + divider + "\n";
+    }
 
-    @api(environments={CommandHelperEnvironment.class})
+    @api(environments = {CommandHelperEnvironment.class})
     public static class super_cancel extends AbstractFunction {
 
-		@Override
+        @Override
         public String getName() {
             return "super_cancel";
         }
 
-		@Override
+        @Override
         public Integer[] numArgs() {
             return new Integer[]{0};
         }
 
-		@Override
+        @Override
         public String docs() {
             return "void {} \"Super Cancels\" an event. This only will work if play-dirty is set to true. If an event is"
                     + " super cancelled, not only is the cancelled flag set to true, the event stops propagating down, so"
@@ -160,26 +183,27 @@ public class Sandbox {
                     + " framework that injects custom event handlers into bukkit.";
         }
 
-		@Override
+        @Override
         public Class<? extends CREThrowable>[] thrown() {
             return new Class[]{CREBindException.class};
         }
 
-		@Override
+        @Override
         public boolean isRestricted() {
             return true;
         }
-		@Override
+
+        @Override
         public CHVersion since() {
             return CHVersion.V3_3_0;
         }
 
-		@Override
+        @Override
         public Boolean runAsync() {
             return null;
         }
 
-		@Override
+        @Override
         public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
             BoundEvent.ActiveEvent original = environment.getEnv(GlobalEnv.class).GetEvent();
             if (original == null) {
@@ -187,7 +211,7 @@ public class Sandbox {
             }
             if (original.getUnderlyingEvent() != null && original.getUnderlyingEvent() instanceof Cancellable
                     && original.getUnderlyingEvent() instanceof org.bukkit.event.Event) {
-                ( (Cancellable) original.getUnderlyingEvent() ).setCancelled(true);
+                ((Cancellable) original.getUnderlyingEvent()).setCancelled(true);
                 BukkitDirtyRegisteredListener.setCancelled((org.bukkit.event.Event) original.getUnderlyingEvent());
             }
             environment.getEnv(GlobalEnv.class).GetEvent().setCancelled(true);
@@ -195,20 +219,20 @@ public class Sandbox {
         }
     }
 
-    @api(environments={CommandHelperEnvironment.class})
+    @api(environments = {CommandHelperEnvironment.class})
     public static class enchant_inv_unsafe extends AbstractFunction {
 
-		@Override
+        @Override
         public String getName() {
             return "enchant_inv_unsafe";
         }
 
-		@Override
+        @Override
         public Integer[] numArgs() {
             return new Integer[]{3, 4};
         }
 
-		@Override
+        @Override
         public String docs() {
             return "void {[player], slot, type, level} Works the same as enchant_inv, except anything goes. "
                     + " You can enchant a fish with a level 5000 enchantment if you wish. Side effects"
@@ -216,27 +240,28 @@ public class Sandbox {
                     + " crash your server, be careful with it.)";
         }
 
-		@Override
+        @Override
         public Class<? extends CREThrowable>[] thrown() {
             return new Class[]{CRECastException.class, CREEnchantmentException.class,
-				CREPlayerOfflineException.class, CRENotFoundException.class};
+                    CREPlayerOfflineException.class, CRENotFoundException.class};
         }
 
-		@Override
+        @Override
         public boolean isRestricted() {
             return true;
         }
-		@Override
+
+        @Override
         public CHVersion since() {
             return CHVersion.V0_0_0;
         }
 
-		@Override
+        @Override
         public Boolean runAsync() {
             return false;
         }
 
-		@Override
+        @Override
         public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
             MCPlayer m = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
             int offset = 1;
@@ -244,28 +269,28 @@ public class Sandbox {
                 m = Static.GetPlayer(args[0].val(), t);
                 offset = 0;
             }
-			Static.AssertPlayerNonNull(m, t);
+            Static.AssertPlayerNonNull(m, t);
             MCItemStack is;
             if (args[1 - offset] instanceof CNull) {
                 is = m.getItemInHand();
             } else {
                 int slot = Static.getInt32(args[1 - offset], t);
-				MCPlayerInventory pinv = m.getInventory();
-				if (pinv == null) {
-					throw new CRENotFoundException(
-						"Could not find the inventory of the given player (are you running in cmdline mode?)", t);
-				}
+                MCPlayerInventory pinv = m.getInventory();
+                if (pinv == null) {
+                    throw new CRENotFoundException(
+                            "Could not find the inventory of the given player (are you running in cmdline mode?)", t);
+                }
                 is = pinv.getItem(slot);
             }
             CArray enchantArray = new CArray(t);
-            if (!( args[2 - offset] instanceof CArray )) {
+            if (!(args[2 - offset] instanceof CArray)) {
                 enchantArray.push(args[2 - offset], t);
             } else {
                 enchantArray = (CArray) args[2 - offset];
             }
 
             CArray levelArray = new CArray(t);
-            if (!( args[3 - offset] instanceof CArray )) {
+            if (!(args[3 - offset] instanceof CArray)) {
                 levelArray.push(args[3 - offset], t);
             } else {
                 levelArray = (CArray) args[3 - offset];
@@ -283,20 +308,20 @@ public class Sandbox {
         }
     }
 
-    @api(environments={CommandHelperEnvironment.class})
+    @api(environments = {CommandHelperEnvironment.class})
     public static class raw_set_pvanish extends AbstractFunction {
 
-		@Override
+        @Override
         public String getName() {
             return "raw_set_pvanish";
         }
 
-		@Override
+        @Override
         public Integer[] numArgs() {
             return new Integer[]{2, 3};
         }
 
-		@Override
+        @Override
         public String docs() {
             return "void {[player], isVanished, otherPlayer} Sets the visibility"
                     + " of the current player (or the one specified) to visible or invisible"
@@ -305,21 +330,22 @@ public class Sandbox {
                     + " the CommandHelper vanish api functions will probably be easier to use.";
         }
 
-		@Override
+        @Override
         public Class<? extends CREThrowable>[] thrown() {
             return new Class[]{CREPlayerOfflineException.class};
         }
 
-		@Override
+        @Override
         public boolean isRestricted() {
             return true; //lol, very
         }
-		@Override
+
+        @Override
         public Boolean runAsync() {
             return false;
         }
 
-		@Override
+        @Override
         public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
             MCPlayer me;
             boolean isVanished;
@@ -339,47 +365,48 @@ public class Sandbox {
             return CVoid.VOID;
         }
 
-		@Override
+        @Override
         public CHVersion since() {
             return CHVersion.V3_3_0;
         }
     }
 
-    @api(environments={CommandHelperEnvironment.class})
+    @api(environments = {CommandHelperEnvironment.class})
     public static class raw_pcan_see extends AbstractFunction {
 
-		@Override
+        @Override
         public String getName() {
             return "raw_pcan_see";
         }
 
-		@Override
+        @Override
         public Integer[] numArgs() {
             return new Integer[]{1, 2};
         }
 
-		@Override
+        @Override
         public String docs() {
             return "boolean {[player], other} Returns a boolean stating if the other player can"
                     + " see this player or not. This is the raw access function, you probably shouldn't use this, as"
                     + " the CommandHelper vanish api functions will probably be easier to use.";
         }
 
-		@Override
+        @Override
         public Class<? extends CREThrowable>[] thrown() {
             return new Class[]{CREPlayerOfflineException.class};
         }
 
-		@Override
+        @Override
         public boolean isRestricted() {
             return true;
         }
-		@Override
+
+        @Override
         public Boolean runAsync() {
             return false;
         }
 
-		@Override
+        @Override
         public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
             MCPlayer me;
             MCPlayer other;
@@ -393,248 +420,224 @@ public class Sandbox {
             return CBoolean.get(me.canSee(other));
         }
 
-		@Override
+        @Override
         public CHVersion since() {
             return CHVersion.V3_3_0;
         }
     }
 
-	private static String GenerateMooSaying(String text){
-			String [] saying = text.split("\r\n|\n|\n\r");
-			int longest = 0;
-			for(String s : saying){
-				longest = java.lang.Math.max(longest, s.length());
-			}
-			String divider = "";
-			for(int i = 0; i < longest + 4; i++){
-				divider += "-";
-			}
-			String[] lines = new String[saying.length];
-			for(int i = 0; i < saying.length; i++){
-				int spaces = longest - saying[i].length();
-				String sSpaces = "";
-				for(int j = 0; j < spaces; j++){
-					sSpaces += " ";
-				}
-				lines[i] = "| " + saying[i] + sSpaces + " |";
-			}
-			return divider + "\n"
-				+ StringUtils.Join(lines, "\n") + "\n"
-				+ divider + "\n";
-	}
+    @api
+    @hide("This is an easter egg.")
+    public static class moo extends DummyFunction {
 
-	@api
-	@hide("This is an easter egg.")
-	public static class moo extends DummyFunction {
-
-		@Override
-		public Integer[] numArgs() {
-			return new Integer[]{1};
-		}
+        @Override
+        public Integer[] numArgs() {
+            return new Integer[]{1};
+        }
 
 
-		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-			return new CString(GenerateMooSaying(args[0].val())
-				+ " \\   ^__^\n"
-				+ "  \\  (oo)\\_______\n"
-				+ "     (__)\\       )\\/\\\n"
-				+ "         ||----w |\n"
-				+ "         ||     ||\n", t);
-		}
+        @Override
+        public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+            return new CString(GenerateMooSaying(args[0].val())
+                    + " \\   ^__^\n"
+                    + "  \\  (oo)\\_______\n"
+                    + "     (__)\\       )\\/\\\n"
+                    + "         ||----w |\n"
+                    + "         ||     ||\n", t);
+        }
 
-	}
+    }
 
-	@api
-	@hide("This is an easter egg.")
-	public static class moo2 extends DummyFunction {
+    @api
+    @hide("This is an easter egg.")
+    public static class moo2 extends DummyFunction {
 
-		@Override
-		public Integer[] numArgs() {
-			return new Integer[]{1};
-		}
+        @Override
+        public Integer[] numArgs() {
+            return new Integer[]{1};
+        }
 
-		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-			return new CString(
-					GenerateMooSaying(args[0].val())
-				+ "              ^__^   /\n"
-				+ "      _______/(oo)  /\n"
-				+ " /\\/(        /(__)\n"
-				+ "      | w----||\n"
-				+ "      ||     ||\n", t);
-		}
+        @Override
+        public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+            return new CString(
+                    GenerateMooSaying(args[0].val())
+                            + "              ^__^   /\n"
+                            + "      _______/(oo)  /\n"
+                            + " /\\/(        /(__)\n"
+                            + "      | w----||\n"
+                            + "      ||     ||\n", t);
+        }
 
-	}
+    }
 
-	@api
-	@hide("This is an easter egg.")
-	public static class upupdowndownleftrightleftrightbastart extends DummyFunction {
+    @api
+    @hide("This is an easter egg.")
+    public static class upupdowndownleftrightleftrightbastart extends DummyFunction {
 
-		@Override
-		public Integer[] numArgs() {
-			return new Integer[]{Integer.MAX_VALUE};
-		}
+        @Override
+        public Integer[] numArgs() {
+            return new Integer[]{Integer.MAX_VALUE};
+        }
 
-		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-			return new CString( "  .-*)) `*-.\n" +
-								" /*  ((*   *'.\n" +
-								"|   *))  *   *\\\n" +
-								"| *  ((*   *  /\n" +
-								" \\  *))  *  .'\n" +
-								"  '-.((*_.-'", t);
-		}
+        @Override
+        public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+            return new CString("  .-*)) `*-.\n" +
+                    " /*  ((*   *'.\n" +
+                    "|   *))  *   *\\\n" +
+                    "| *  ((*   *  /\n" +
+                    " \\  *))  *  .'\n" +
+                    "  '-.((*_.-'", t);
+        }
 
-	}
+    }
 
-	@api
-	@hide("This is an easter egg")
-	@noboilerplate
-	public static class norway extends DummyFunction {
+    @api
+    @hide("This is an easter egg")
+    @noboilerplate
+    public static class norway extends DummyFunction {
 
-		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-			Function color = new Echoes.color();
-			String red = color.exec(t, environment, args.length == 3 ? args[0] : new CString("RED", t)).val();
-			String white = color.exec(t, environment, args.length == 3 ? args[1] : new CString("WHITE", t)).val();
-			String blue = color.exec(t, environment, args.length == 3 ? args[2] : new CString("BLUE", t)).val();
-			int multiplier = 2;
-			char c = '=';
-			String one = multiply(c, 1 * multiplier);
-			String two = multiply(c, 2 * multiplier);
-			String six = multiply(c, 6 * multiplier);
-			String seven = multiply(c, 7 * multiplier);
-			String twelve = multiply(c, 12 * multiplier);
-			String thirteen = multiply(c, 13 * multiplier);
-			String twentytwo = multiply(c, 22 * multiplier);
-			for(int i = 0; i < 6; ++i){
-				System.out.println(Static.MCToANSIColors(red + six + white + one + blue + two + white + one + red + twelve) + TermColors.RESET);
-			}
-			System.out.println(Static.MCToANSIColors(white + seven + blue + two + white + thirteen) + TermColors.RESET);
-			for(int i = 0; i < 2; ++i){
-				System.out.println(Static.MCToANSIColors(blue + twentytwo) + TermColors.RESET);
-			}
-			System.out.println(Static.MCToANSIColors(white + seven + blue + two + white + thirteen) + TermColors.RESET);
-			for(int i = 0; i < 6; ++i){
-				System.out.println(Static.MCToANSIColors(red + six + white + one + blue + two + white + one + red + twelve) + TermColors.RESET);
-			}
+        public static String multiply(char c, int times) {
+            StringBuilder b = new StringBuilder();
+            for (int i = 0; i < times; ++i) {
+                b.append(c);
+            }
+            return b.toString();
+        }
 
-			return CVoid.VOID;
-		}
+        @Override
+        public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+            Function color = new Echoes.color();
+            String red = color.exec(t, environment, args.length == 3 ? args[0] : new CString("RED", t)).val();
+            String white = color.exec(t, environment, args.length == 3 ? args[1] : new CString("WHITE", t)).val();
+            String blue = color.exec(t, environment, args.length == 3 ? args[2] : new CString("BLUE", t)).val();
+            int multiplier = 2;
+            char c = '=';
+            String one = multiply(c, 1 * multiplier);
+            String two = multiply(c, 2 * multiplier);
+            String six = multiply(c, 6 * multiplier);
+            String seven = multiply(c, 7 * multiplier);
+            String twelve = multiply(c, 12 * multiplier);
+            String thirteen = multiply(c, 13 * multiplier);
+            String twentytwo = multiply(c, 22 * multiplier);
+            for (int i = 0; i < 6; ++i) {
+                System.out.println(Static.MCToANSIColors(red + six + white + one + blue + two + white + one + red + twelve) + TermColors.RESET);
+            }
+            System.out.println(Static.MCToANSIColors(white + seven + blue + two + white + thirteen) + TermColors.RESET);
+            for (int i = 0; i < 2; ++i) {
+                System.out.println(Static.MCToANSIColors(blue + twentytwo) + TermColors.RESET);
+            }
+            System.out.println(Static.MCToANSIColors(white + seven + blue + two + white + thirteen) + TermColors.RESET);
+            for (int i = 0; i < 6; ++i) {
+                System.out.println(Static.MCToANSIColors(red + six + white + one + blue + two + white + one + red + twelve) + TermColors.RESET);
+            }
 
-		@Override
-		public Integer[] numArgs() {
-			return new Integer[]{0, 3};
-		}
+            return CVoid.VOID;
+        }
 
-		public static String multiply(char c, int times){
-			StringBuilder b = new StringBuilder();
-			for(int i = 0; i < times; ++i){
-				b.append(c);
-			}
-			return b.toString();
-		}
+        @Override
+        public Integer[] numArgs() {
+            return new Integer[]{0, 3};
+        }
 
-	}
-	
-	@api
-	public static class srand extends AbstractFunction {
-		@Override
-		public Class<? extends CREThrowable>[] thrown() {
-			return new Class[]{CRECastException.class};
-		}
+    }
 
-		@Override
-		public boolean isRestricted() {
-			return false;
-		}
+    @api
+    public static class srand extends AbstractFunction {
+        @Override
+        public Class<? extends CREThrowable>[] thrown() {
+            return new Class[]{CRECastException.class};
+        }
 
-		@Override
-		public Boolean runAsync() {
-			return null;
-		}
+        @Override
+        public boolean isRestricted() {
+            return false;
+        }
 
-		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-			Random r;
-			try {
-				r = (Random)ArgumentValidation.getObject(args[0], t, CResource.class).getResource();
-			} catch(ClassCastException ex){
-				throw new CRECastException("Expected a resource of type " + ResourceManager.ResourceTypes.RANDOM, t, ex);
-			}
-			double d = r.nextDouble();
-			return new CDouble(d, t);
-		}
+        @Override
+        public Boolean runAsync() {
+            return null;
+        }
 
-		@Override
-		public String getName() {
-			return "srand";
-		}
+        @Override
+        public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+            Random r;
+            try {
+                r = (Random) ArgumentValidation.getObject(args[0], t, CResource.class).getResource();
+            } catch (ClassCastException ex) {
+                throw new CRECastException("Expected a resource of type " + ResourceManager.ResourceTypes.RANDOM, t, ex);
+            }
+            double d = r.nextDouble();
+            return new CDouble(d, t);
+        }
 
-		@Override
-		public Integer[] numArgs() {
-			return new Integer[]{1};
-		}
+        @Override
+        public String getName() {
+            return "srand";
+        }
 
-		@Override
-		public String docs() {
-			return "double {randomResource} Returns a new rand value. If the seed used to create the resource is the same, each resulting"
-					+ " series of numbers will be the same.";
-		}
+        @Override
+        public Integer[] numArgs() {
+            return new Integer[]{1};
+        }
 
-		@Override
-		public Version since() {
-			return CHVersion.V3_3_2;
-		}
-		
-	}
-	
-	@api
-	public static class test_composite_function extends CompositeFunction {
+        @Override
+        public String docs() {
+            return "double {randomResource} Returns a new rand value. If the seed used to create the resource is the same, each resulting"
+                    + " series of numbers will be the same.";
+        }
 
-		@Override
-		protected String script() {
-			// Note that @a is not going to be in scope for the user's scripts.
-			return "@a = ((@arguments[0] + @arguments[1]) > 0);"
-					+ "return(@a);";
-		}
+        @Override
+        public Version since() {
+            return CHVersion.V3_3_2;
+        }
 
-		@Override
-		public Class<? extends CREThrowable>[] thrown() {
-			return new Class[]{CRECastException.class};
-		}
+    }
 
-		@Override
-		public boolean isRestricted() {
-			return false;
-		}
+    @api
+    public static class test_composite_function extends CompositeFunction {
 
-		@Override
-		public Boolean runAsync() {
-			return null;
-		}
+        @Override
+        protected String script() {
+            // Note that @a is not going to be in scope for the user's scripts.
+            return "@a = ((@arguments[0] + @arguments[1]) > 0);"
+                    + "return(@a);";
+        }
 
-		@Override
-		public String getName() {
-			return "test_composite_function";
-		}
+        @Override
+        public Class<? extends CREThrowable>[] thrown() {
+            return new Class[]{CRECastException.class};
+        }
 
-		@Override
-		public Integer[] numArgs() {
-			return new Integer[]{2};
-		}
+        @Override
+        public boolean isRestricted() {
+            return false;
+        }
 
-		@Override
-		public String docs() {
-			return "boolean {a, b} This is a test function, which demonstrates to extension authors how to make a composite function."
-					+ " It returns true if a and b added together are greater than 0, false otherwise.";
-		}
+        @Override
+        public Boolean runAsync() {
+            return null;
+        }
 
-		@Override
-		public Version since() {
-			return CHVersion.V3_3_2;
-		}
-		
-	}
+        @Override
+        public String getName() {
+            return "test_composite_function";
+        }
+
+        @Override
+        public Integer[] numArgs() {
+            return new Integer[]{2};
+        }
+
+        @Override
+        public String docs() {
+            return "boolean {a, b} This is a test function, which demonstrates to extension authors how to make a composite function."
+                    + " It returns true if a and b added together are greater than 0, false otherwise.";
+        }
+
+        @Override
+        public Version since() {
+            return CHVersion.V3_3_2;
+        }
+
+    }
 }

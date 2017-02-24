@@ -1,5 +1,3 @@
-
-
 package com.laytonsmith.commandhelper;
 
 import com.laytonsmith.abstraction.MCCommandSender;
@@ -11,28 +9,29 @@ import com.laytonsmith.core.InternalException;
 import com.laytonsmith.core.Static;
 import com.laytonsmith.core.events.EventUtils;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
-import java.util.logging.Level;
 import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.server.ServerCommandEvent;
 
+import java.util.logging.Level;
+
 /**
  *
- * 
+ *
  */
-public class CommandHelperServerListener implements Listener{
-    
-    @EventHandler(priority= EventPriority.LOWEST)
-    public void onServerCommand(ServerCommandEvent event){
-		//Run this first, so external events can intercept it.
-		BukkitMiscEvents.BukkitMCConsoleCommandEvent cce = new BukkitMiscEvents.BukkitMCConsoleCommandEvent(event);
-		EventUtils.TriggerExternal(cce);
+public class CommandHelperServerListener implements Listener {
+
+    @EventHandler(priority = EventPriority.LOWEST)
+    public void onServerCommand(ServerCommandEvent event) {
+        //Run this first, so external events can intercept it.
+        BukkitMiscEvents.BukkitMCConsoleCommandEvent cce = new BukkitMiscEvents.BukkitMCConsoleCommandEvent(event);
+        EventUtils.TriggerExternal(cce);
         MCCommandSender player = new BukkitMCCommandSender(event.getSender());
-        if(event.getSender() instanceof ConsoleCommandSender){
+        if (event.getSender() instanceof ConsoleCommandSender) {
             //Need the more specific subtype for player()
-            player = new BukkitMCConsoleCommandSender((ConsoleCommandSender)event.getSender());
+            player = new BukkitMCConsoleCommandSender((ConsoleCommandSender) event.getSender());
         }
         boolean match = false;
         try {
@@ -49,9 +48,9 @@ public class CommandHelperServerListener implements Listener{
         }
         //To prevent "unknown console command" error, set the command to the meta command
         //commandhelper null, which just returns true.
-        if(match){
+        if (match) {
             event.setCommand("commandhelper null");
         }
     }
-    
+
 }
