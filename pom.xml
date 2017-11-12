@@ -178,6 +178,8 @@
             <groupId>org.bukkit</groupId>
             <artifactId>bukkit</artifactId>
             <version>1.5.2-R1.1-SNAPSHOT</version>
+            <scope>system</scope>
+            <systemPath>${project.basedir}\libs\spigot.jar</systemPath>
         </dependency>
 
         <!-- Used for storing and retreiving Constructs in a storage transparent medium: JSONs -->
